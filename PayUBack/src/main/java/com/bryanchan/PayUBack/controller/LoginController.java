@@ -4,6 +4,7 @@ package com.bryanchan.PayUBack.controller;
 import com.azure.core.annotation.Get;
 import com.bryanchan.PayUBack.model.User;
 import com.bryanchan.PayUBack.repository.UserRepository;
+import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,9 @@ public class LoginController {
         boolean authenticationSuccess = false;
         List<User> users = userRepository.findUserByUsername(username);
         if (!users.isEmpty()) {
-            authenticationSuccess = users.get(0).getPassword().equals(password);
+            StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
+            String encryptedPassword = users.get(0).getPassword();
+            authenticationSuccess = encryptor.checkPassword(password, encryptedPassword);
         }
 
         if (authenticationSuccess) {

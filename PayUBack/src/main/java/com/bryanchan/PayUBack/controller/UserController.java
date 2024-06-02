@@ -6,6 +6,7 @@ import com.bryanchan.PayUBack.repository.UserRepository;
 
 import com.bryanchan.PayUBack.utils.ValueGenerator;
 import org.apache.coyote.Response;
+import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,9 @@ public class UserController {
             // every created user is guaranteed to have a token
             String token = ValueGenerator.generateNewValue();
             user.setToken(token);
+            String plainPassword = user.getPassword();
+            StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
+            user.setPassword(encryptor.encryptPassword(plainPassword));
             userRepository.save(user);
             return new ResponseEntity("New User created", HttpStatus.OK);
         } else {
@@ -63,11 +67,17 @@ public class UserController {
     }
 
     @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteExistingCustomer(@PathVariable String username) {
+    public ResponseEntity<String> deleteExistingUser(@PathVariable String username) {
         List<User> users = userRepository.findUserByUsername(username);
         if (!users.isEmpty()) {
             userRepository.delete(users.get(0));
         }
+        return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/wipe")
+    public ResponseEntity<String> deleteAll() {
+        userRepository.deleteAll();
         return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
     }
 
@@ -78,7 +88,7 @@ public class UserController {
         if (!users.isEmpty()) {
             c.setToken(users.get(0).getToken());
             c.setId(users.get(0).getId());
-            this.deleteExistingCustomer(username);
+            this.deleteExistingUser(username);
             this.add(c);
         }
         return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);

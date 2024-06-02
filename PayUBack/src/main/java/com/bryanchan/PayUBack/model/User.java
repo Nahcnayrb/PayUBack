@@ -6,6 +6,8 @@ import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
 import com.bryanchan.PayUBack.utils.ValueGenerator;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.tomcat.util.codec.binary.Base64;
+import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
@@ -42,6 +44,9 @@ public class User {
         this.username = username.toLowerCase().trim();
         this.password = password;
     }
+
+
+
 
 
 }
