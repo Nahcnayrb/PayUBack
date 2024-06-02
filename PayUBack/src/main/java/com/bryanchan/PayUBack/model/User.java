@@ -3,13 +3,12 @@ package com.bryanchan.PayUBack.model;
 
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
+import com.bryanchan.PayUBack.utils.ValueGenerator;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -17,18 +16,31 @@ import javax.persistence.Id;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private String id;
+
+    private String username;
+
+    @Nullable
     private String firstName;
 
+    @Nullable
     @PartitionKey
     private String lastName;
-    private String email;
+    private String password;
+    private String token;
 
-    public User(String firstName, String lastName, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
+    public User(String firstName, String lastName, String username, String password) {
+        this.id = ValueGenerator.generateNewValue();
+        if (firstName != null) {
+            this.firstName = firstName.trim();
+        }
+
+        if (lastName != null) {
+            this.lastName = lastName.trim();
+        }
+
+        this.username = username.toLowerCase().trim();
+        this.password = password;
     }
 
 

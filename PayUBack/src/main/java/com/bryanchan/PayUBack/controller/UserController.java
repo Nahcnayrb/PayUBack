@@ -4,16 +4,15 @@ import com.azure.cosmos.models.PartitionKey;
 import com.bryanchan.PayUBack.model.User;
 import com.bryanchan.PayUBack.repository.UserRepository;
 
+import com.bryanchan.PayUBack.utils.ValueGenerator;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
@@ -24,49 +23,64 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping("/add")
-    public String add(@RequestBody User user) {
-        userRepository.save(user);
-        return "New User created";
+    public ResponseEntity<String> add(@RequestBody User user) {
+
+        List<User> users = userRepository.findUserByUsername(user.getUsername());
+        if (users.isEmpty()) {
+            // every created user is guaranteed to have a token
+            String token = ValueGenerator.generateNewValue();
+            user.setToken(token);
+            userRepository.save(user);
+            return new ResponseEntity("New User created", HttpStatus.OK);
+        } else {
+            // case already exists
+            return new ResponseEntity("user already exists", HttpStatus.CONFLICT);
+        }
     }
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add("ContentType", "application/json");
-        List<User> userList = new ArrayList<>();
 
-        userList = userRepository.getAllUsers();
+        List<User> userList = userRepository.getAllUsers();
         return new ResponseEntity<List<User>>(userList, responseHeaders, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<List<User>> getUsers(@PathVariable Integer id) {
+    @GetMapping("/{username}")
+    public ResponseEntity getUsers(@PathVariable String username) {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add("ContentType", "application/json");
-        List<User> userList = new ArrayList<>();
 
-        List<Optional<User>> optionaUserList = Collections.singletonList(userRepository.findById(id));
-        if (!(optionaUserList.get(0).isEmpty())) {
-            optionaUserList.stream().forEach(c -> c.ifPresent(user -> userList.add(user)));
-            return new ResponseEntity<List<User>>(userList, responseHeaders, HttpStatus.OK);
+        List<User> users = userRepository.findUserByUsername(username);
+        if (!users.isEmpty()) {
+            return new ResponseEntity<User>(users.get(0), responseHeaders, HttpStatus.OK);
         }
 
         // case user not found
-        return new ResponseEntity<List<User>>(userList, responseHeaders, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteExistingCustomer(@PathVariable Integer id) {
-        Optional<User> user = userRepository.findById(id);
-        userRepository.deleteById(id, new PartitionKey(user.get().getLastName()));
+    @DeleteMapping("/{username}")
+    public ResponseEntity<String> deleteExistingCustomer(@PathVariable String username) {
+        List<User> users = userRepository.findUserByUsername(username);
+        if (!users.isEmpty()) {
+            userRepository.delete(users.get(0));
+        }
         return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateExistingCustomer(@PathVariable Integer id, @RequestBody User c) {
+    @PutMapping("/{username}")
+    public ResponseEntity<String> updateExistingUser(@PathVariable String username, @RequestBody User c) {
 
-        userRepository.save(c);
+        List<User> users = userRepository.findUserByUsername(username);
+        if (!users.isEmpty()) {
+            c.setToken(users.get(0).getToken());
+            c.setId(users.get(0).getId());
+            this.deleteExistingCustomer(username);
+            this.add(c);
+        }
         return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
     }
 }
