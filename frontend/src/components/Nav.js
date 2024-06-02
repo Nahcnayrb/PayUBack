@@ -1,5 +1,7 @@
 import {React, Component } from "react"
 import { Link } from "react-router-dom"
+import Dropdown from 'react-bootstrap/Dropdown';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 export default class Nav extends Component {
 
     handleLogout = () => {
@@ -20,12 +22,16 @@ export default class Nav extends Component {
             <li  className='nav-item'>
               <Link className='nav-link' to={'/dashboard'} >Dashboard</Link>
             </li>
-            <li  className='nav-item'>
-              <Link className='nav-link'  to={'/'} >{this.props.user.firstName} {this.props.user.lastName}</Link>
-            </li>
-            <li  className='nav-item'>
-              <Link className='nav-link' onClick={this.handleLogout} to={'/'} >Logout</Link>
-            </li>
+            <Dropdown>
+              <Dropdown.Toggle variant="white" id="dropdown-basic" >
+                {this.props.user.firstName} {this.props.user.lastName}
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item href="#/action-1">My Profile</Dropdown.Item>
+                <Dropdown.Item href="#/action-2">Settings</Dropdown.Item>
+                <Dropdown.Item onClick={this.handleLogout}>Logout</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </ul>
         )
 
@@ -45,8 +51,11 @@ export default class Nav extends Component {
         return (
         <nav className='navbar navbar-expand navbar-light fixed-top'>
         <div className='container'>
-          <Link className='navbar-brand' to={'/'}>PayUBack</Link>
-          <div className='collapse navbar-collapse'>
+
+          <Link className='navbar-brand' to={'/'}>
+          <RequestQuoteIcon fontSize="large" />PayUBack
+          </Link>
+          <div className='collapse navbar-collapse' id='navbar-custom'>
             {buttons}
           </div>
         </div>

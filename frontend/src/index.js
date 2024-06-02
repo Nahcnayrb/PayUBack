@@ -6,7 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import axios from 'axios';
 
 
-axios.defaults.baseURL='http://localhost:8080/'
+axios.defaults.baseURL='http://192.168.1.86:8080/'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

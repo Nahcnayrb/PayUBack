@@ -1,6 +1,7 @@
 import { React, Component } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import Alert from '@mui/material/Alert';
 
 export default class Register extends Component {
 
@@ -33,7 +34,7 @@ export default class Register extends Component {
             confirmPasswordMessage: confirmPasswordMessage
         })
 
-        if ((usernameMessage.length !== 0) || passwordMessage.length !== 0) {
+        if ((usernameMessage.length !== 0) || passwordMessage.length !== 0 || confirmPasswordMessage.length !== 0) {
             return
         }
 
@@ -52,6 +53,7 @@ export default class Register extends Component {
                 this.setState({
                     registered: true
                 })
+                alert("Your account was successfully created!")
             }
         ).catch(
             err => {
@@ -65,7 +67,7 @@ export default class Register extends Component {
 
     render() {
         if (this.state.registered) {
-            return <Navigate to={'/login'}/>
+            return <Navigate to={'/login'}/> 
         }
 
         let usernameError = ""
@@ -98,30 +100,35 @@ export default class Register extends Component {
 
         return (
             <form onSubmit={this.handleSubmit}>
-                <h3>Sign Up</h3>
+                <h3>Create new account</h3>
                 <div className='form-group'>
                     <label>First Name</label>
                     <input type='text' className="form-control" placeholder="First Name" onChange={e => this.firstName = e.target.value}/>
                 </div>
+                <div className="padding"></div>
                 <div className='form-group'>
                     <label>Last Name</label>
                     <input type='text' className="form-control" placeholder="Last Name" onChange={e => this.lastName = e.target.value}/>
                 </div>
+                <div className="padding"></div>
                 {usernameError}
                 <div className='form-group'>
                     <label>Username</label>
                     <input type='text' className="form-control" placeholder="user name" onChange={e => this.username = e.target.value}/>
                 </div>
+                <div className="padding"></div>
                 {passwordError}
                 <div className='form-group'>
                     <label>Password</label>
                     <input type='password' className="form-control" placeholder="password" onChange={e => this.password = e.target.value}/>
                 </div>
+                <div className="padding"></div>
                 {confirmPasswordError}
                 <div className='form-group'>
                     <label>Confirm Password</label>
                     <input type='password' className="form-control" placeholder="password" onChange={e => this.confirmPassword = e.target.value}/>
                 </div>
+                <div className="padding"></div>
                 <button className="btn btn-primary btn-block">Sign Up</button>
             </form>
         )
