@@ -43,17 +43,13 @@ setUser = user => {
           
               <div className='App'>
                 <Nav user={this.state.user} setUser={this.setUser}/>
-      
-                <div className='auth-wrapper'>
-                  <div className='auth-inner'>
+
                     <Routes>
                       <Route exact path='/' element={<Home user={this.state.user}/>}/>
                       <Route exact path='/login' element={<Login setUser={this.setUser}/>}/>
                       <Route exact path='/register' element={<Register setUser={this.setUser}/>}/>
-                      <Route exact path='/dashboard' element={<Dashboard />}></Route>
+                      <Route exact path='/dashboard' element={<Dashboard user={this.state.user}/>}></Route>
                     </Routes>
-                  </div>
-                </div>
       
               </div>
         </BrowserRouter>
