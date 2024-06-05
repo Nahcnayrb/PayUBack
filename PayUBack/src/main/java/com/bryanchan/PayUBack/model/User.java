@@ -35,10 +35,16 @@ public class User {
         this.id = ValueGenerator.generateNewValue();
         if (firstName != null) {
             this.firstName = firstName.trim();
+        } else {
+            // case first name is null
+            this.firstName = "";
         }
 
         if (lastName != null) {
             this.lastName = lastName.trim();
+        } else {
+            // case last name null
+            this.lastName = "";
         }
 
         this.username = username.toLowerCase().trim();
