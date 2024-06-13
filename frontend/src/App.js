@@ -13,7 +13,9 @@ import Dashboard from './components/Dashboard';
 
 export default class App extends Component {
 
-  state = {}
+  state = {
+    fetchedUsers:false
+  }
 
   componentDidMount() {
     const token = localStorage.getItem("token")
@@ -21,13 +23,33 @@ export default class App extends Component {
       axios.get('login/' + token).then(
           res => {
               this.setUser(res.data)
-
+              if (!this.state.fetchedUsers) {
+                this.fetchAllUsers()
+              }
+              setTimeout(()=>{}, 500)
+              //this.fetchAllUsers()
           },
           err => {
               console.log(err)
           }
       )
   }
+}
+
+fetchAllUsers = async () => {
+  await axios.get('users').then(
+      res => {
+          // res.data is a json array
+          this.setState({
+              fetchedUsers: true,
+              users: res.data
+          })
+
+      },
+      err => {
+          console.log(err)
+      }
+  )
 }
 
 setUser = user => {
@@ -42,7 +64,7 @@ setUser = user => {
           <BrowserRouter>
           
               <div className='App'>
-                <Nav user={this.state.user} setUser={this.setUser}/>
+                <Nav user={this.state.user} setUser={this.setUser} users={this.state.users}/>
 
                     <Routes>
                       <Route exact path='/' element={<Home user={this.state.user}/>}/>
@@ -57,27 +79,3 @@ setUser = user => {
       )}
 
 }
-
-// function App() {
-//   return (
-//     <BrowserRouter>
-    
-//         <div className='App'>
-//           <Nav/>
-
-//           <div className='auth-wrapper'>
-//             <div className='auth-inner'>
-//               <Routes>
-//                 <Route exact path='/' element={<Home/>}/>
-//                 <Route exact path='/login' element={<Login/>}/>
-//                 <Route exact path='/register' element={<Register/>}/>
-
-//               </Routes>
-//             </div>
-//           </div>
-
-//         </div>
-//   </BrowserRouter>
-  
-// )}
-// export default App;

@@ -5,43 +5,40 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import { Button } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import AddModal from "./AddModal";
-
+import axios from "axios";
 export default class Nav extends Component {
 
   state = {
-    firstOptions: [{ value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' }],
-    secondOptions: [{name: 'Option 1', id: 1},{name: 'Option 2', id: 2}]
-  };
+  }
+
 
   setShow = show => {
-      this.setState({
-        show: show
-      })
-    }
 
-  handleClose = () => this.setShow(false)
-  handleShow = () => this.setShow(true)
+    this.setState({
+      show: show
+    })
+}
 
+  handleShow = () => {
 
+      this.setShow(true)
+  }
 
     handleLogout = () => {
       localStorage.removeItem("token")
       this.props.setUser(null)
+      window.location.assign('/')
 
     }
 
     render() {
 
       let buttons;
-      let addButton = "";
 
       if (this.props.user) {
         // case logged in
 
         buttons = (
-
           <ul className='navbar-nav ml-auto'>
             <li  className='nav-item'>
               <Link className='nav-link' to={'/dashboard'} >Dashboard</Link>
@@ -78,11 +75,20 @@ export default class Nav extends Component {
         <div className='container'>
 
           <Link className='navbar-brand' to={'/'}>
-          <RequestQuoteIcon fontSize="large" />PayUBack
+          <RequestQuoteIcon fontSize="large" />
+          <label className='navbar-headers'>PayUBack</label>
           </Link>
+          {this.props.user?
+          <>
+          <Button variant="contained" id="addButton" style={{backgroundColor: "#21b6ae"}} onClick={this.handleShow}>
+            <AddIcon></AddIcon>
+            <label className='navbar-headers'>New Expense</label>
+          </Button>
+          <AddModal isAdd={true} users={this.props.users} show={this.state.show} setShow={this.setShow} currentUser={this.props.user}></AddModal>
+          </> : <></>}
           <div className="right-div">
             {buttons}
-          </div>
+          </div>  
         </div>
       </nav>
         )

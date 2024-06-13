@@ -34,6 +34,7 @@ body, html, .App, #root, .auth-wrapper {
   text-align: left;
 }
 
+
 .auth-inner {
   width:450px;
   margin: auto;
@@ -49,6 +50,23 @@ body, html, .App, #root, .auth-wrapper {
   border-color: #639dd4;
   box-shadow: none;
 
+}
+
+#input-example {
+  width: 20%;
+  border-color: #639dd4;
+  font-size: 17px;
+  font-weight: 500;
+  font-family: 'Fira Sans', sans-serif;
+
+}
+
+#next-modal-input {
+  width: 40%;
+  border-color: #639dd4;
+  font-size: 17px;
+  font-weight: 500;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 
@@ -85,10 +103,11 @@ body, html, .App, #root, .auth-wrapper {
 .container {
   font-size:100%;
 
+
 }
 
 .navbar-brand {
-  font-size:160% !important;
+  font-size:180% !important;
   font-family: Helvetica, sans-serif;
   font-weight: 700;
   letter-spacing: 0.1rem;
@@ -96,7 +115,8 @@ body, html, .App, #root, .auth-wrapper {
 }
 
 #navbar-custom {
-  justify-content: right !important;
+  /* justify-content: right !important; */
+  justify-content: center;
 }
 
 #dropdown-basic {
@@ -104,7 +124,7 @@ body, html, .App, #root, .auth-wrapper {
   font-weight: 400;
   font-family: 'Fira Sans', sans-serif;
   color:black;
-  padding-top: 0.5rem;
+  padding-top: 0.4rem;
 }
 
 .padding {
@@ -113,4 +133,139 @@ body, html, .App, #root, .auth-wrapper {
 
 .navbar-nav.ml-auto li a {
   color:black;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+#addButton {
+  font-size:100%;
+  font-family: Helvetica, sans-serif;
+  font-weight: 600;
+}
+
+.right-div {
+  justify-content: right;
+  
+
+}
+
+.navbar.navbar-expand.navbar-light.fixed-top {
+  /* overflow-x: auto;
+  overflow-y: visible; */
+  white-space: nowrap;
+}
+
+.dashboard-container {
+  width:90%;
+  margin: auto;
+  background: #ffffff;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+  padding: 40px  55px 45px 55px;
+  border-radius: 15px;
+  transition: all .3s;
+}
+
+.AddModal .NextModal {
+
+  width:95%;
+  min-height: 70% !important;
+}
+
+
+.owed-container{
+  background-color: #ffffff;
+}
+
+.owing-container{
+  background-color: #ffffff;
+}
+
+.dashboard-padding {
+  padding-top: 8%;
+}
+
+
+.amount-label {
+  width: 100%
+}
+
+.textbox {
+
+  width: 50%;
+  height: 100px;
+  overflow-wrap: break-word;
+
+}
+
+#total-input {
+  width: 29%;
+  border-color: #639dd4;
+  font-size: 17px;
+  font-weight: 500;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+#next-modal-alert {
+  width: 80% !important;
+}
+
+
+#data-header {
+  font-size: 20px;
+}
+
+.navbar-headers {
+  cursor: pointer;
+}
+
+@media (max-width: 500px) {
+  .navbar-headers {
+    display:none;
+  }
+
+}
+
+@media (max-width: 1000px) {
+
+  .auth-inner {
+    width:90%;
+  }
+
+  .dashboard-padding {
+    padding-top: 30%;
+  }
+
+  .navbar-brand {
+    font-size:100% !important;
+  }
+
+  #input-example {
+    width: 60%;
+    border-color: #639dd4;
+    font-size: 17px;
+    font-weight: 500;
+    font-family: 'Fira Sans', sans-serif;
+  
+  }
+
+  #next-modal-input {
+    width: 100%;
+    border-color: #639dd4;
+    font-size: 17px;
+    font-weight: 500;
+    font-family: 'Fira Sans', sans-serif;
+  }
+
+  #total-input {
+    width: 100%;
+    border-color: #639dd4;
+    font-size: 17px;
+    font-weight: 500;
+    font-family: 'Fira Sans', sans-serif;
+  }
+
+  #next-modal-alert {
+    width: 100% !important;
+  }
+
+
 }

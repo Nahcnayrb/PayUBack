@@ -4,14 +4,18 @@ import Modal from 'react-bootstrap/Modal';
 import CurrencyInput from 'react-currency-input-field';
 import Select from 'react-select'
 import NextModal from './NextModal';
+import { CompareSharp } from '@material-ui/icons';
+import { toHaveStyle } from '@testing-library/jest-dom/matchers';
 
 export default class AddModal extends Component {
 
     
     state = {
+        hasLoadedData:false
 
     
     }
+
 
 
     resetDate = () => {
@@ -25,20 +29,24 @@ export default class AddModal extends Component {
     }
 
     componentDidMount() {
-        this.clearAddData()
+        // first load
         this.clearMessages()
+        this.clearAddData()
         this.resetDate()
+
 
     }
 
     handleNext = () => {
+
+        // validate data shown on Add/Edit Modal
 
         let invalidPayerUserMessage=""
         let invalidInvolvedUsersMessage=""
         let invalidAmountMessage=""
         let payerUsername = ""
 
-        console.log(this.state.payerUser)
+
         if (this.state.payerUser === "") {
             invalidPayerUserMessage = "A payer must be selected"
         } else {
@@ -71,7 +79,6 @@ export default class AddModal extends Component {
         if (invalidAmountMessage.length !== 0 ||invalidInvolvedUsersMessage.length !== 0 || invalidAmountMessage.length !== 0 ) {
             return
         }
-
 
 
         this.setShowNext(true)
@@ -112,10 +119,12 @@ export default class AddModal extends Component {
         this.props.setShow(false)
         this.clearMessages()
         this.clearAddData()
+        this.setDataIsLoaded(false)
 
     }
 
     handlePrevious = () => {
+        // if we're here, we definitely came back from nextModal
         this.props.setShow(true)
         this.setShowNext(false)
         this.setState({
@@ -125,36 +134,108 @@ export default class AddModal extends Component {
         })
     }
 
-    // handleCreate = () => {
+    createOption = (userJson) => {
 
-    //     let borrowerUsernameArray = []
+        let option = {}
 
-    //     this.state.involvedUsers.forEach((option) => {
-    //         borrowerUsernameArray.push(option.value)
-    //     })
+        let label = this.getLabel(userJson.username)
+
+        option = {
+            value: userJson.username,
+            label: label
+        }
+
+        return option
+
+    }
+
+    loadData = () => {
 
 
-    //     const data = {
-    //         payerUsername: this.state.payerUser.value,
-    //         borrowerUsernames : borrowerUsernameArray,
-    //         amount: this.state.amount
-    //     }
+        if (!this.props.editExpenseData || this.state.isLoaded) {
+            // case editexpense data is empty or null
+            // we would be in here if adding data
+            return
+        }
 
-    //     console.log(data)
-    //     axios.post('/expenses/add', data).then(
-    //         res => {
-    //             console.log(res)
-    //         }
-    //     ).catch(
-    //         err => {
-    //             console.log(err.response.data.message)
-    //         }
-    //     )
+        let expenseJson = this.props.editExpenseData
 
-    //     this.setShowNext(false)
-    //     this.props.setShow(false)
+        let payerUsername = expenseJson.payerUsername
+        let borrowerDataList = expenseJson.borrowerDataList
+        let date = expenseJson.date
+        let amount = expenseJson.amount
+        let allUsers = this.props.users
+
+        this.setState({
+            fetchedTotal: amount
+        })
+     
+        let involvedUsersOptions = []
+
+        let payerLabel = this.getLabel(payerUsername)
+
+        let payerUserOption = {
+
+         value: payerUsername,
+         label: payerLabel
+        }
+        let payerUserIsAssigned = false
+
+        borrowerDataList.forEach((borrowerData) => {
+
+         allUsers.forEach((user) => {
+
+             if (user.username == borrowerData.username) {
+                 involvedUsersOptions.push(this.createOption(user))
+             }
+         })
+
+        })
+
+        // at this point, involvedusersoptions is filled with borrower options
+
+         this.setState({
+             description: expenseJson.description,
+             involvedUsers: involvedUsersOptions,
+             payerUser: payerUserOption,
+             date: date,
+             amount: amount
+         })
+
+    }
+
+
+    getLabel = (username) => {
+
+        let allUsers = this.props.users
+
+        for (let i = 0; i < allUsers.length; i++) {
+            let user = allUsers[i]
+            if (user.username == username) {
+                let name = ""
+                if (username == this.props.currentUser.username) {
+                    // case user is logged in user
+                    name = "Me"
+                } else {
+                    // found user
+                    name = user.firstName + " " + user.lastName 
+                }
+
+                name += (" (@" + username + ")")
+                return name
+            } 
+        }
+        // case cannot find user
+        return ""
+
+    }
+
+    setDataIsLoaded = (isLoaded) => {
+        this.setState({
+            isLoaded: isLoaded
+        })
         
-    // }
+    }
 
     
 
@@ -162,27 +243,23 @@ export default class AddModal extends Component {
     render() {
 
 
-        let usersArray = this.props.users
+        if (!this.props.currentUser) {
+            // case not logged in
+            return (
+                <>
+                <div className='dashboard-padding'></div>
+                <div className='dashboard-container'></div>
+                </>
+            )
+        }
+
+        let usersArray =this.props.users
 
         let optionsArray = []
 
         if (usersArray != null) {
         usersArray.forEach((userJson) => {
-            let option = {};
-            if (userJson.username === this.props.currentUser.username) {
-                // case curr user is the logged in user
-                option = {
-                    value: userJson.username,
-                    label: "Me (@" + userJson.username + ")"
-                }
-
-            } else {
-                option = {
-                    value: userJson.username,
-                    label: userJson.firstName + " " + userJson.lastName + " (@" + userJson.username + ")"
-                }
-            }
-
+            let option = this.createOption(userJson)
             optionsArray.push(option)
         })}
 
@@ -228,16 +305,22 @@ export default class AddModal extends Component {
 
             return (
                 <NextModal 
+                    isAdd={this.props.isAdd}
+                    editExpenseData={this.props.editExpenseData}
                     showNext={this.state.showNext}
                     handlePrevious={this.handlePrevious}
                     handleClose={this.handleClose}
                     involvedUsers={this.state.involvedUsers}
                     payerUser={this.state.payerUser}
                     setShowNext={this.setShowNext}
+                    setDataIsLoaded={this.setDataIsLoaded}
                     amount={this.state.amount}
                     description={this.state.description}
                     date={this.state.date}
                     setShow={this.props.setShow}
+                    currentUser={this.props.currentUser}
+                    users={this.props.users}
+                    originalTotal={this.state.fetchedTotal}
                  ></NextModal>
             )
 
@@ -250,11 +333,13 @@ export default class AddModal extends Component {
                     onHide={this.handleClose}
                     keyboard={false}
                     size='xl'
+                    onShow={this.loadData}
                     backdrop='static'>
 
                         <Modal.Header className='modal-header'closeButton>
                         <Modal.Title >
-                            <h3>Add a new Expense</h3>
+                            
+                            <h3>{this.props.isAdd? "Add a new Expense" : "Edit Expense"}</h3>
                         </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>

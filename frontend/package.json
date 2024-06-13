@@ -9,6 +9,7 @@
     "@material-ui/icons": "^4.11.3",
     "@mui/icons-material": "^5.15.19",
     "@mui/material": "^5.15.19",
+    "@mui/x-data-grid": "^7.6.1",
     "@mui/x-date-pickers": "^7.6.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -18,12 +19,14 @@
     "dayjs": "^1.11.11",
     "multiselect-react-dropdown": "^2.0.25",
     "react": "^18.3.1",
+    "react-admin": "^4.16.18",
     "react-bootstrap": "^2.10.2",
     "react-currency-input-field": "^3.8.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
     "react-select": "^5.8.0",
+    "react-super-responsive-table": "^5.2.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

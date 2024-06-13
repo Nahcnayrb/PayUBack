@@ -13,21 +13,6 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import CurrencyInput from 'react-currency-input-field';
-import { toHaveStyle } from '@testing-library/jest-dom/matchers';
-import { LocalConvenienceStoreOutlined } from '@material-ui/icons';
-
-
-// const TAX_RATE = 0.07;
-
-// function ccyFormat(num) {
-//   return `${num.toFixed(2)}`;
-// }
-
-
-
-
-
-
 
 export default class NextModal extends Component {
 
@@ -35,35 +20,112 @@ export default class NextModal extends Component {
     constructor(props) {
         super(props)
 
-        // by default, split equally 
 
-        let rows = []
+        // by default, split equally if is add modal
 
-        // let involvedUserAmount = 0
+        if (this.props.isAdd) {
 
-        //let amountPerUser = parseFloat((this.props.amount / this.props.involvedUsers.length).toFixed(2))
-        this.props.involvedUsers.forEach((involvedUser) => {
-            // value = username
-            // label = first last + username
-            let name = involvedUser.label
-            let hasPaid = (involvedUser.value === this.props.payerUser.value)
+            let rows = []
 
-            // involvedUserAmount += amountPerUser
+            this.props.involvedUsers.forEach((involvedUser) => {
+                // value = username
+                // label = first last + username
+                let name = involvedUser.label
+                let hasPaid = (involvedUser.value === this.props.payerUser.value)
 
-            let row = {
-                label: name,
-                hasPaid: hasPaid,
-                amount: 0,
-                username: involvedUser.value
+
+                let row = {
+                    label: name,
+                    hasPaid: hasPaid,
+                    amount: 0,
+                    username: involvedUser.value
+                }
+                rows.push(row)
+            })
+
+            
+            this.state={
+                splitEqually: true,
+                rows: rows
             }
-            rows.push(row)
-        })
+        } else {
+            // case edit
+            // load rows
 
-        
-        this.state={
-            splitEqually: true,
-            rows: rows
+            let rows = []
+            let expenseJson = this.props.editExpenseData
+            let borrowerDataList = expenseJson.borrowerDataList
+
+            let total = this.props.amount
+            let remaining = total
+            let resetAmounts = false
+
+            if (this.props.originalTotal != total) {
+                // case the total was changed by user 
+                resetAmounts = true
+            }
+
+            // if the curr total is different from the total loaded from database, set all amounts to 0
+            borrowerDataList.forEach((borrower) => {
+                let borrowerUsername = borrower.username
+                let label = this.getLabel(borrowerUsername)
+                let hasPaid = borrower.hasPaid
+
+                let amount = borrower.amount
+                if (resetAmounts) {
+                    amount = 0;
+                }
+                remaining =  (remaining - amount).toFixed(2)
+
+                let rowData = {
+                    label: label,
+                    username: borrowerUsername,
+                    hasPaid: hasPaid,
+                    amount: amount
+                }
+                rows.push(rowData)
+    
+            })
+            this.props.setDataIsLoaded(true)
+
+            this.state={
+                rows: rows,
+                splitEqually: false,
+                remaining:remaining
+            }
+
         }
+    }
+
+    componentDidMount() {
+        if (this.props.isAdd) {
+            this.splitEqually()
+        }
+    }
+
+    getLabel = (username) => {
+
+        let allUsers = this.props.users
+
+        for (let i = 0; i < allUsers.length; i++) {
+            let user = allUsers[i]
+            if (user.username == username) {
+                let name = ""
+                if (username == this.props.currentUser.username) {
+                    // case user is logged in user
+                    name = "Me"
+                } else {
+                    // found user
+                    name = user.firstName + " " + user.lastName 
+                }
+
+                name += (" (@" + username + ")")
+                return name
+            } 
+        }
+        // case cannot find user
+        return ""
+
     }
 
 
@@ -80,13 +142,8 @@ export default class NextModal extends Component {
         })
     }
 
-    componentDidMount() {
-
-        this.splitEqually()
-
-    }
-
     splitEqually = () => {
+        console.log("SPLITING EQUALLY WTF")
         let totalAmount = this.props.amount
         let rows = this.state.rows
 
@@ -97,10 +154,11 @@ export default class NextModal extends Component {
 
         rows.forEach((row) => {
             row.amount = amountPerUser
-            remaining -= amountPerUser
+            remaining = parseFloat((remaining - amountPerUser).toFixed(2))
             if ((remaining != 0) && (currIndex == rows.length - 1)) {
                 // case we have remaining value and we're on the last row
-                row.amount += parseFloat(remaining.toFixed(2))
+                row.amount = parseFloat((row.amount + remaining).toFixed(2))
+
                 remaining = 0
             }
             currIndex++
@@ -163,7 +221,9 @@ export default class NextModal extends Component {
         // clear all user fields to 0
         // unassigned amount depends on the fields 
         this.setSplit(choice)
-        this.splitEqually()
+        if (choice) {
+            this.splitEqually()
+        }
 
     }
 
@@ -211,15 +271,7 @@ export default class NextModal extends Component {
         })
     }
 
-
-    handleCreate = () => {
-
-
-        // let borrowerUsernameArray = []
-
-        // this.props.involvedUsers.forEach((option) => {
-        //     borrowerUsernameArray.push(option.value)
-        // })
+    handleCreate = async () => {
 
         let hasRemainingAmountErrorMessage = ""
 
@@ -236,7 +288,6 @@ export default class NextModal extends Component {
             return
         }
 
-
         let borrowerDataArray = []
 
         this.state.rows.forEach((row) => {
@@ -252,33 +303,71 @@ export default class NextModal extends Component {
         })
 
 
-        const data = {
-            payerUsername: this.props.payerUser.value,
-            borrowerDataList : borrowerDataArray,
-            amount: this.props.amount,
-            date: this.props.date,
-            description: this.props.description
+        if (this.props.isAdd) {
+
+            const data = {
+                payerUsername: this.props.payerUser.value,
+                borrowerDataList : borrowerDataArray,
+                amount: this.props.amount,
+                date: this.props.date,
+                description: this.props.description
+            }
+
+            await axios.post('/expenses/add', data).then(
+                res => {
+                    console.log(res)
+                }
+            ).catch(
+                err => {
+                    console.log(err.response.data.message)
+                }
+            )
+        } else {
+
+            let expenseID = this.props.editExpenseData.id
+            const data = {
+                id: expenseID,
+                payerUsername: this.props.payerUser.value,
+                borrowerDataList : borrowerDataArray,
+                amount: this.props.amount,
+                date: this.props.date,
+                description: this.props.description
+            }
+            // case edit save
+            await axios.put('/expenses/' + expenseID, data).then(
+                res => {
+                    console.log(res)
+                }
+            ).catch(
+                err => {
+                    console.log(err.response.data.message)
+                }
+            )
         }
 
-        console.log(data)
-        axios.post('/expenses/add', data).then(
-            res => {
-                console.log(res)
-            }
-        ).catch(
-            err => {
-                console.log(err.response.data.message)
-            }
-        )
-
-
         this.props.handleClose()
+
+        if (this.props.isAdd) {
+            window.location.reload()
+        }
         
     }
-    
 
 
     render() {
+
+
+        
+        if (!this.props.currentUser) {
+            // case not logged in
+            return (
+                <>
+                <div className='dashboard-padding'></div>
+                <div className='dashboard-container'></div>
+                </>
+            )
+        }
+
 
          let hasRemainingAmountError = ""
 
@@ -299,13 +388,13 @@ export default class NextModal extends Component {
 
             <Modal.Header className='modal-header'closeButton>
             <Modal.Title >
-                <h3>Add a new Expense</h3>
+                {this.isAdd? <h3>Add a new Expense</h3>: <h3>Edit Expense</h3>}
             </Modal.Title>
             </Modal.Header>
             <Modal.Body>
 
             <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 150 }} aria-label="spanning table" >
+      <Table sx={{ minWidth: 150 }} aria-label="spanning table">
         <TableHead>
           <TableRow key={""}>
             <TableCell align="left" >
@@ -317,7 +406,7 @@ export default class NextModal extends Component {
             <TableCell align="right" >
                 <h4>Amount Owed</h4>
                 <label>Split Equally</label>
-                <Checkbox defaultChecked onChange={e => this.handleSplit(e.target.checked)}/>
+                <Checkbox checked={this.state.splitEqually} onChange={e => this.handleSplit(e.target.checked)}/>
                 </TableCell>
 
           </TableRow>
@@ -379,8 +468,6 @@ export default class NextModal extends Component {
                     value={this.props.amount}
                     decimalsLimit={2}
                 />
-
-
             </TableCell>
           </TableRow>
         </TableBody>
@@ -396,7 +483,7 @@ export default class NextModal extends Component {
             <Button variant="secondary" onClick={this.props.handleClose}>
                 Cancel
             </Button>
-            <Button variant="primary" onClick={this.handleCreate}>Create</Button>
+            {this.isAdd? <Button variant="primary" onClick={this.handleCreate}>Create</Button> : <Button variant="primary" onClick={this.handleCreate}>Save</Button>}
             </Modal.Footer>
         </Modal>
     )}
