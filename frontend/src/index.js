@@ -6,7 +6,8 @@ import reportWebVitals from './reportWebVitals';
 import axios from 'axios';
 
 
-axios.defaults.baseURL='http://192.168.1.86:8080/'
+axios.defaults.baseURL='https://payuback2.calmforest-2dc5e7fc.eastus2.azurecontainerapps.io/'
+axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*"
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
