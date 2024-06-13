@@ -14,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/expenses")
 public class ExpenseController {
@@ -35,7 +37,36 @@ public class ExpenseController {
     }
 
 
-    @GetMapping("owed/{username}")
+    @PutMapping("/{expenseId}")
+    public ResponseEntity<String> updateExistingExpense(@PathVariable String expenseId, @RequestBody Expense expense) {
+
+        Optional<Expense> fetchedExpense = expenseRepository.findById(expenseId);
+        if (fetchedExpense.isPresent()) {
+            // case is an existing expense
+            expenseRepository.save(expense);
+            return new ResponseEntity("Expense updated", HttpStatus.OK);
+        }
+        return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+    }
+
+
+    @GetMapping("/{expenseId}")
+    public ResponseEntity getExpenseById(@PathVariable String expenseId) {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.add("ContentType", "application/json");
+
+        Optional<Expense> expense = expenseRepository.findById(expenseId);
+
+        if (expense.isPresent()) {
+            // case found expense
+            return new ResponseEntity<>(expense.get(), responseHeaders, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+        }
+
+    }
+
+    @GetMapping("owing/{username}")
     public ResponseEntity getExpensesWhereUserIsPayer(@PathVariable String username) {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add("ContentType", "application/json");
@@ -51,7 +82,7 @@ public class ExpenseController {
     }
 
 
-    @GetMapping("owing/{username}")
+    @GetMapping("owed/{username}")
     public ResponseEntity getExpensesWhereUserIsBorrower(@PathVariable String username) {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add("ContentType", "application/json");
@@ -69,6 +100,17 @@ public class ExpenseController {
     @DeleteMapping("/wipe")
     public ResponseEntity<String> deleteAll() {
         expenseRepository.deleteAll();
-        return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
+        return new ResponseEntity<String>("", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{expenseID}")
+    public ResponseEntity<String> deleteExpenseById(@PathVariable String expenseID) {
+        Optional<Expense> fetchedExpense = expenseRepository.findById(expenseID);
+        if (fetchedExpense.isPresent()) {
+            expenseRepository.delete(fetchedExpense.get());
+            return new ResponseEntity<String>("", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+        }
     }
 }
