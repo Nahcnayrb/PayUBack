@@ -27,7 +27,7 @@ export default class Nav extends Component {
     handleLogout = () => {
       localStorage.removeItem("token")
       this.props.setUser(null)
-      window.location.assign('/')
+      window.location.reload()
 
     }
 
