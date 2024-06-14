@@ -131,8 +131,6 @@ export default class Dashboard extends Component {
                     expenseJson.borrowerDataList.forEach((borrowerData) => {
 
 
-
-                        // if any of the borrowers haven't paid, hasSettled will end up being false
                         if (borrowerData.username === currentUsername) {
                             hasSettled = borrowerData.hasPaid
                             amount +=  borrowerData.amount.toFixed(2)
@@ -154,13 +152,6 @@ export default class Dashboard extends Component {
                     owedExpenseDataArray.push(dataJson)
 
                 })
-
-                // res.data is a json array
-                //console.log(res.data)
-                // owingHeaders = ["Date","Description", "Amount","Settled"]
-
-                // need to store date, description, amount, if every user has paid
-                // to see if every user paid, iterate through borrowerDataList to see if hasPaid = true for all
 
                 this.setOwedExpenses(owedExpenseDataArray)
             },
@@ -295,11 +286,6 @@ export default class Dashboard extends Component {
     render() {
 
         // window.scrollTo(0, 0)
-
-        // if (!this.props.user) {
-        //     // case not logged in
-        //     return <Navigate to={'/'}/>
-        // }
 
         if (!this.props.user) {
             // case not logged in

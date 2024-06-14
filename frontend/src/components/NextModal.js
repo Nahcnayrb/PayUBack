@@ -20,7 +20,6 @@ export default class NextModal extends Component {
     constructor(props) {
         super(props)
 
-
         // by default, split equally if is add modal
 
         if (this.props.isAdd || this.props.editMadeChanges) {
@@ -58,15 +57,6 @@ export default class NextModal extends Component {
         } else {
             // case edit
             // load rows
-            // case 1: numerical data/payer user is unchanged from original 
-            // this means payer, # of involved users, & total amount are the same
-            // use editExpense for hasPaid / amount / total
-            
-            // case 2: numerical data/payer user got changed from original 
-            //          we ignore original borrowerDataList and use this.props.involvedUsers
-
-            // if we're in this case, we're in edit and no significant changes have been made
-            // 
 
             let rows = []
             let expenseJson = this.props.editExpenseData
@@ -323,16 +313,16 @@ export default class NextModal extends Component {
 
         })
 
+        const data = {
+            payerUsername: this.props.payerUser.value,
+            borrowerDataList : borrowerDataArray,
+            amount: this.props.amount,
+            date: this.props.date,
+            description: this.props.description
+        }
+
 
         if (this.props.isAdd) {
-
-            const data = {
-                payerUsername: this.props.payerUser.value,
-                borrowerDataList : borrowerDataArray,
-                amount: this.props.amount,
-                date: this.props.date,
-                description: this.props.description
-            }
 
             await axios.post('/expenses/add', data).then(
                 res => {
@@ -346,14 +336,8 @@ export default class NextModal extends Component {
         } else {
 
             let expenseID = this.props.editExpenseData.id
-            const data = {
-                id: expenseID,
-                payerUsername: this.props.payerUser.value,
-                borrowerDataList : borrowerDataArray,
-                amount: this.props.amount,
-                date: this.props.date,
-                description: this.props.description
-            }
+
+            data['id'] = expenseID
             // case edit save
             await axios.put('/expenses/' + expenseID, data).then(
                 res => {

@@ -104,31 +104,4 @@ export default class Home extends Component {
                 </>
 
         )}
-
-        
-    //     return( 
-    //         <div className='auth-wrapper'>
-    //             <div className='auth-inner'>
-    //                 <div>
-    //                     <h3 className='welcome-headers'>
-    //                         <RequestQuoteIcon fontSize="large" />
-    //                         PayUBack {this.state.version}
-    //                         </h3>
-    //                     <Button variant="contained" id='patch-notes-button' style={{backgroundColor: "#003366"}} onClick={this.handleShow}>
-    //                         View Patch Notes
-    //                     </Button>  
-    //                     <div className="home-padding"/>
-    //                 <h2>You are not logged in :(</h2>
-    //                 <div className="padding"></div>
-    //                 <h3> Please log in or create a new account to continue.</h3>
-
-    //                 <div className="home-padding"/>
-    //                 <label id='footnote-label'>Made with <FavoriteIcon fontSize="small"/> by <Link to={'https://www.linkedin.com/in/nahcnayrb/'}>Bryan Chan</Link></label>
-                    
-    //                 </div>
-    //             </div>
-    //         </div>
-    //     )
-        
-    // }
 }
