@@ -23,7 +23,10 @@ export default class NextModal extends Component {
 
         // by default, split equally if is add modal
 
-        if (this.props.isAdd) {
+        if (this.props.isAdd || this.props.editMadeChanges) {
+
+            // editmade changes might be true
+            //we ignore original borrowerDataList and use this.props.involvedUsers
 
             let rows = []
 
@@ -43,14 +46,27 @@ export default class NextModal extends Component {
                 rows.push(row)
             })
 
+            if (this.props.editMadeChanges) {
+                this.props.setDataIsLoaded(true)
+            }
             
             this.state={
+                // splitEqually: (this.props.isAdd? true: false),
                 splitEqually: true,
                 rows: rows
             }
         } else {
             // case edit
             // load rows
+            // case 1: numerical data/payer user is unchanged from original 
+            // this means payer, # of involved users, & total amount are the same
+            // use editExpense for hasPaid / amount / total
+            
+            // case 2: numerical data/payer user got changed from original 
+            //          we ignore original borrowerDataList and use this.props.involvedUsers
+
+            // if we're in this case, we're in edit and no significant changes have been made
+            // 
 
             let rows = []
             let expenseJson = this.props.editExpenseData
@@ -70,6 +86,10 @@ export default class NextModal extends Component {
                 let borrowerUsername = borrower.username
                 let label = this.getLabel(borrowerUsername)
                 let hasPaid = borrower.hasPaid
+
+                if (borrower.username == this.props.payerUser.value) {
+                    hasPaid = true
+                }
 
                 let amount = borrower.amount
                 if (resetAmounts) {
@@ -98,7 +118,7 @@ export default class NextModal extends Component {
     }
 
     componentDidMount() {
-        if (this.props.isAdd) {
+        if (this.props.isAdd || this.props.editMadeChanges) {
             this.splitEqually()
         }
     }
@@ -143,7 +163,6 @@ export default class NextModal extends Component {
     }
 
     splitEqually = () => {
-        console.log("SPLITING EQUALLY WTF")
         let totalAmount = this.props.amount
         let rows = this.state.rows
 
@@ -485,6 +504,7 @@ export default class NextModal extends Component {
             </Button>
             {this.isAdd? <Button variant="primary" onClick={this.handleCreate}>Create</Button> : <Button variant="primary" onClick={this.handleCreate}>Save</Button>}
             </Modal.Footer>
+            <div className='modal-padding'></div>
         </Modal>
     )}
 }

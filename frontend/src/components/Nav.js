@@ -27,7 +27,7 @@ export default class Nav extends Component {
     handleLogout = () => {
       localStorage.removeItem("token")
       this.props.setUser(null)
-      window.location.reload()
+      window.location.assign("/")
 
     }
 
@@ -80,7 +80,7 @@ export default class Nav extends Component {
           </Link>
           {this.props.user?
           <>
-          <Button variant="contained" id="addButton" style={{backgroundColor: "#21b6ae"}} onClick={this.handleShow}>
+          <Button variant="contained" id="addButton" style={{backgroundColor: "#003366"}} onClick={this.handleShow}>
             <AddIcon></AddIcon>
             <label className='navbar-headers'>New Expense</label>
           </Button>

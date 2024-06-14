@@ -16,8 +16,6 @@ export default class AddModal extends Component {
     
     }
 
-
-
     resetDate = () => {
 
         var curr = new Date();
@@ -80,10 +78,69 @@ export default class AddModal extends Component {
             return
         }
 
+        // check if current significant changes are equal to fetched changes
+        // if no, we need to set editmadechanges=true to indicate not to use borrowerdata list later
+
+        if (!this.props.isAdd) {
+            // case edit
+
+            let expenseJson = this.props.editExpenseData
+            let borrowerDataList = expenseJson.borrowerDataList
+            let currUserList = this.state.involvedUsers
+            let involvedUserSet = new Set()
+            let fetchedTotal = expenseJson.amount
+            let currTotal = this.state.amount
+
+            // both list's length must be equal
+            // 
+
+            // borrower data list should match 1:1 with current involved users
+            // if not, we have significant change
+
+            // curr total amount should match fetched total amount 
+            // if not we have significant change
+
+            if (fetchedTotal != currTotal) {
+
+                // case total has been changed
+                // dont need to check involved users
+                this.setEditMadeChanges(true)
+            } else {
+                // case total was not changed
+                // need to check involved users
+
+
+                if (currUserList.length == borrowerDataList.length) {
+
+                    currUserList.forEach((involvedUser) => {
+                        involvedUserSet.add(involvedUser.value)
+                    })
+                    // curr user list has the usernames of all the curr involved users
+
+                    for (let i = 0; i < borrowerDataList.length; i++) {
+                        let borrower = borrowerDataList[i]
+                        if (!involvedUserSet.has(borrower.username)) {
+                            this.setEditMadeChanges(true)
+                        }
+                    }
+
+                } else {
+                    // case not equals
+                    // set significant change
+                    this.setEditMadeChanges(true)
+                }
+            }
+        }
 
         this.setShowNext(true)
         this.props.setShow(false)
 
+    }
+
+    setEditMadeChanges = (madeChange) => {
+        this.setState({
+            editMadeChanges: madeChange
+        })
     }
 
     setShowNext = show => {
@@ -120,6 +177,7 @@ export default class AddModal extends Component {
         this.clearMessages()
         this.clearAddData()
         this.setDataIsLoaded(false)
+        this.setEditMadeChanges(false)
 
     }
 
@@ -321,6 +379,7 @@ export default class AddModal extends Component {
                     currentUser={this.props.currentUser}
                     users={this.props.users}
                     originalTotal={this.state.fetchedTotal}
+                    editMadeChanges={this.state.editMadeChanges}
                  ></NextModal>
             )
 
@@ -420,6 +479,7 @@ export default class AddModal extends Component {
                         </Button>
                         <Button variant="primary" onClick={this.handleNext}>Next</Button>
                         </Modal.Footer>
+                        <div className='modal-padding'></div>
                 </Modal>
     )}}
 }

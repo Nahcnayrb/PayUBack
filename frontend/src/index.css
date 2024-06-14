@@ -164,10 +164,30 @@ body, html, .App, #root, .auth-wrapper {
   transition: all .3s;
 }
 
+.patch-notes-container {
+  width:40%;
+  margin: auto;
+  background: #ffffff;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+  padding: 40px  55px 45px 55px;
+  border-radius: 15px;
+  transition: all .3s;
+}
+
+#patch-notes-button {
+  margin: 0 auto;
+  display: block;
+  margin-bottom: 5%;
+  text-align:center !important;
+  font-family: 'Fira Sans', sans-serif;
+}
+
 .AddModal .NextModal {
 
   width:95%;
   min-height: 70% !important;
+  /* margin-bottom: 20% !important;
+  padding-bottom: 50% !important; */
 }
 
 
@@ -217,14 +237,38 @@ body, html, .App, #root, .auth-wrapper {
   cursor: pointer;
 }
 
+#footnote-label {
+  padding-top: 5%;
+  margin: 0 auto;
+  display: block;
+  font-size: 12px;
+  text-align: center;
+}
+
+.home-padding {
+  padding-top: 30%;
+}
+
 @media (max-width: 500px) {
   .navbar-headers {
     display:none;
+  }
+  .welcome-headers {
+    text-align: center;
+    font-size: 20px;
+  }
+
+  .modal-padding {
+    padding-top: 5%;
   }
 
 }
 
 @media (max-width: 1000px) {
+
+  .home-padding {
+    padding-top: 10%;
+  }
 
   .auth-inner {
     width:90%;

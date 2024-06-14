@@ -43,6 +43,7 @@ public class ExpenseController {
         Optional<Expense> fetchedExpense = expenseRepository.findById(expenseId);
         if (fetchedExpense.isPresent()) {
             // case is an existing expense
+            expenseRepository.delete(fetchedExpense.get());
             expenseRepository.save(expense);
             return new ResponseEntity("Expense updated", HttpStatus.OK);
         }

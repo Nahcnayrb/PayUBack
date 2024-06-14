@@ -45,8 +45,9 @@ export default class Dashboard extends Component {
         await axios.get("/expenses/owing/" + currentUsername).then(
             res => {
 
+                this.setHasExpensesToBePaid(true)
                 res.data.forEach((expenseJson) => {
-                    // for each expense object that the current user is owing
+                    // for each expense object that the current user is the payer user
 
                     let hasSettled = true
                     let date = expenseJson.date
@@ -76,10 +77,6 @@ export default class Dashboard extends Component {
 
                 })
 
-                // res.data is a json array
-                //console.log(res.data)
-                // owingHeaders = ["Date","Description", "Amount","Settled"]
-
                 // need to store date, description, amount, if every user has paid
                 // to see if every user paid, iterate through borrowerDataList to see if hasPaid = true for all
 
@@ -87,7 +84,7 @@ export default class Dashboard extends Component {
             },
             err => {
                 if (err.response.status == 404) {
-                    console.log("No expenses owing!")
+                    this.setHasExpensesToBePaid(false)
                     this.setOwingExpenses([])
                 }
                 console.log(err)
@@ -123,6 +120,8 @@ export default class Dashboard extends Component {
         await axios.get("/expenses/owed/" + currentUsername).then(
             res => {
 
+                this.setHasExpensesToPay(true)
+
                 res.data.forEach((expenseJson) => {
                     // for each expense object that the current user is owing to 
                     //owedHeaders = ["Date","Description","Owed to","Amount","Paid"]
@@ -130,16 +129,18 @@ export default class Dashboard extends Component {
                     let hasSettled = false
                     let date = expenseJson.date
                     let description = (expenseJson.description) ? expenseJson.description : "No description" 
-                    let amount = "$ " +  expenseJson.amount.toFixed(2)
+                    let amount = "$ "
                     let owedTo = expenseJson.payerUsername
                     let expenseId = expenseJson.id
 
                     expenseJson.borrowerDataList.forEach((borrowerData) => {
 
+
+
                         // if any of the borrowers haven't paid, hasSettled will end up being false
                         if (borrowerData.username == currentUsername) {
                             hasSettled = borrowerData.hasPaid
-                            
+                            amount +=  borrowerData.amount.toFixed(2)
                         }
 
                     })
@@ -170,7 +171,7 @@ export default class Dashboard extends Component {
             },
             err => {
                 if (err.response.status == 404) {
-                    console.log("no expenses owed!")
+                    this.setHasExpensesToPay(false)
                     this.setOwedExpenses([])
                 }
             }
@@ -178,6 +179,17 @@ export default class Dashboard extends Component {
 
     }
 
+    setHasExpensesToPay = (hasExpenses) => {
+        this.setState({
+            hasExpensesToPay: hasExpenses
+        })
+    }
+
+    setHasExpensesToBePaid = (hasExpenses) => {
+        this.setState({
+            hasExpensesToBePaid: hasExpenses
+        })
+    }
     setShow = show => {
 
 
@@ -324,17 +336,21 @@ export default class Dashboard extends Component {
 
                 <div className='owed-container'> 
 
-                    <h3> Expenses I need to pay back</h3>
+                    {this.state.hasExpensesToPay?
+                        <>
+                        <h3> Expenses I need to pay back</h3>
+                        <ExpenseTable 
+                            headers={this.owedHeaders} 
+                            rows={this.state.owedExpenseDataArray} 
+                            isOwed={true} 
+                            handleEdit={this.handleEdit} 
+                            handleDelete={this.handleDelete}
+                            handleClickEdit={this.handleClickEdit}>
 
-                    <ExpenseTable 
-                        headers={this.owedHeaders} 
-                        rows={this.state.owedExpenseDataArray} 
-                        isOwed={true} 
-                        handleEdit={this.handleEdit} 
-                        handleDelete={this.handleDelete}
-                        handleClickEdit={this.handleClickEdit}>
-
-                    </ExpenseTable>
+                        </ExpenseTable>
+                        </>
+                        :
+                        <h3>You don't need to pay back anyone :)</h3>}
 
                 </div>
 
@@ -344,16 +360,20 @@ export default class Dashboard extends Component {
 
             <div className='dashboard-container'>
                 <div className='owing-container'> 
-
-                    <h3> Expenses I need to be paid back </h3>
-                    <ExpenseTable 
-                        headers={this.owingHeaders} 
-                        rows={this.state.owingExpenseDataArray} 
-                        isOwed={false} 
-                        handleEdit={this.handleEdit} 
-                        handleDelete={this.handleDelete}
-                        handleClickEdit={this.handleClickEdit}>
-                    </ExpenseTable>
+                    {this.state.hasExpensesToBePaid?
+                        <>
+                        <h3> Expenses I need to be paid back </h3>
+                        <ExpenseTable 
+                            headers={this.owingHeaders} 
+                            rows={this.state.owingExpenseDataArray} 
+                            isOwed={false} 
+                            handleEdit={this.handleEdit} 
+                            handleDelete={this.handleDelete}
+                            handleClickEdit={this.handleClickEdit}>
+                        </ExpenseTable>
+                        </>
+                        :
+                        <h3>No one needs to pay you back :)</h3>}
 
                 </div>
             </div>
