@@ -3,7 +3,8 @@ import AddModal from './AddModal';
 import axios from 'axios';
 import ExpenseTable from './ExpenseTable';
 import DeleteModal from './DeleteModal';
-
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 export default class Dashboard extends Component {
 
@@ -13,8 +14,8 @@ export default class Dashboard extends Component {
         owingExpenseDataArray:[],
     };
 
-    owedHeaders = ["Date","Description","To Pay","Status"]
-    owingHeaders = ["Date","Description", "Outstanding","Status"]
+    owedHeaders = ["Date","Description","Balance","Status"]
+    owingHeaders = ["Date","Description", "Balance","Status"]
 
 
     setOwingExpenses = (owingExpenses) => {
@@ -304,6 +305,7 @@ export default class Dashboard extends Component {
                 <div className='owed-container'> 
                     {this.state.hasExpensesToPay?
                         <>
+                        <FormControlLabel control={<Switch defaultChecked />} className="form-control-label" label="Group By Users"/>
                         <h3> Expenses I need to pay back</h3>
                         <ExpenseTable 
                             headers={this.owedHeaders} 
@@ -325,6 +327,7 @@ export default class Dashboard extends Component {
                 <div className='owing-container'> 
                     {this.state.hasExpensesToBePaid?
                         <>
+                        <FormControlLabel control={<Switch defaultChecked />} label="Group By Users"/>
                         <h3> Expenses I need to be paid back </h3>
                         <ExpenseTable 
                             headers={this.owingHeaders} 
