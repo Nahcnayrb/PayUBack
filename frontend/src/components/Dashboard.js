@@ -13,8 +13,8 @@ export default class Dashboard extends Component {
         owingExpenseDataArray:[],
     };
 
-    owedHeaders = ["Date","Description","Amount","Status"]
-    owingHeaders = ["Date","Description", "Amount","Status"]
+    owedHeaders = ["Date","Description","To Pay","Status"]
+    owingHeaders = ["Date","Description", "Outstanding","Status"]
 
 
     setOwingExpenses = (owingExpenses) => {
@@ -71,7 +71,7 @@ export default class Dashboard extends Component {
                     let hasSettled = true // true by default for the isExpensesToPay case
                     let date = expenseJson.date
                     let description = (expenseJson.description) ? expenseJson.description : "No description" 
-                    let amount = isExpensesToPay ? "$ " : "$ " +  expenseJson.amount.toFixed(2)
+                    let amount = isExpensesToPay ? "$ " : parseFloat(expenseJson.amount)
                     let expenseId = expenseJson.id
 
                     expenseJson.borrowerDataList.forEach((borrowerData) => {
@@ -80,6 +80,9 @@ export default class Dashboard extends Component {
                         if (!isExpensesToPay) {
                             // case ppl owe user money
                             hasSettled = hasSettled & borrowerData.hasPaid
+                            if (borrowerData.hasPaid) {
+                                amount -= parseFloat(borrowerData.amount)
+                            }
                         } else {
                             // case user owes money to others
                             if (borrowerData.username === currentUsername) {
@@ -90,7 +93,13 @@ export default class Dashboard extends Component {
                     })
 
                     if (!isExpensesToPay) {
-                        hasSettled = (hasSettled === 1) ? "settled" : "outstanding"
+                        if (hasSettled) {
+                            amount = "$ 0.00"
+                            hasSettled = "settled"
+                        } else {
+                            amount = "$ " + amount.toFixed(2)
+                            hasSettled = "outstanding"
+                        }
                     } else {
                         hasSettled = (hasSettled === true) ? "paid" : "unpaid"
                     }
@@ -252,9 +261,6 @@ export default class Dashboard extends Component {
             // confirm delete not yet clicked, this means modal is not open
             this.setShowDelete(true)
         }
-
-        // unshow the delete modal after a delay
-        // are you sure you want to delete _____? this will delete it for everyone involved.
 
     }
 

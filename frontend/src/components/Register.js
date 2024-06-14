@@ -1,6 +1,7 @@
 import { React, Component } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import { Button } from '@mui/material';
 
 export default class Register extends Component {
 
@@ -145,7 +146,9 @@ export default class Register extends Component {
                         </div>
                         <div className="padding"></div>
                         {registerFailError}
-                        <button className="btn btn-primary btn-block">Sign Up</button>
+                        <Button type="submit" variant="contained" style={{backgroundColor: "#003366"}}>
+                                <label style={{cursor: "pointer"}}>Sign Up!</label>
+                        </Button>
                     </form>
                 </div>
             </div>

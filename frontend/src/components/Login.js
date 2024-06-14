@@ -1,6 +1,7 @@
 import {React, Component } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import { Button } from '@mui/material';
 
 export default class Login extends Component {
     state = {}
@@ -68,7 +69,11 @@ export default class Login extends Component {
                             <input type='password' className="form-control" placeholder="password" onChange={e => this.password = e.target.value}/>
                         </div>
                         <div className="padding"></div>
-                        <button className="btn btn-primary btn-block">Log In</button> 
+                        {/* <button className="btn btn-primary btn-block">Log In</button>  */}
+                        <Button type="submit" variant="contained" style={{backgroundColor: "#003366"}}>
+                                <label style={{cursor: "pointer"}}>Log In</label>
+                        </Button>
+
                     </form>
                 </div>
             </div>

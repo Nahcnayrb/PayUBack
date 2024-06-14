@@ -10,8 +10,6 @@ export default class AddModal extends Component {
     
     state = {
         hasLoadedData:false
-
-    
     }
 
     resetDate = () => {
@@ -19,7 +17,6 @@ export default class AddModal extends Component {
         var curr = new Date();
         curr.setDate(curr.getDate());
         var date = curr.toISOString().substring(0,10);
-
         this.setState({date: date})
 
     }
@@ -29,8 +26,6 @@ export default class AddModal extends Component {
         this.clearMessages()
         this.clearAddData()
         this.resetDate()
-
-
     }
 
     handleNext = () => {
