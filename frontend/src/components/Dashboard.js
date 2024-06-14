@@ -1,13 +1,8 @@
 import React,{Component} from 'react'
-import { Button, Checkbox } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
-import { Navigate } from 'react-router-dom';
 import AddModal from './AddModal';
 import axios from 'axios';
-import { DataGrid } from '@mui/x-data-grid';
 import ExpenseTable from './ExpenseTable';
 import DeleteModal from './DeleteModal';
-import { ThirtyFpsOutlined } from '@mui/icons-material';
 
 
 export default class Dashboard extends Component {
@@ -18,8 +13,8 @@ export default class Dashboard extends Component {
         owingExpenseDataArray:[],
     };
 
-    owedHeaders = ["Date","Description","Amount","Status"]
-    owingHeaders = ["Date","Description", "Amount","Status"]
+    owedHeaders = ["Date","Description","To Pay","Status"]
+    owingHeaders = ["Date","Description", "Outstanding","Status"]
 
 
     setOwingExpenses = (owingExpenses) => {
@@ -32,65 +27,6 @@ export default class Dashboard extends Component {
         this.setState({
             owedExpenseDataArray: owedExpenses
         })
-    }
-
-    fetchOwingExpenses = async () => {
-        // people owe the user money
-        console.log("fetched owing expenses")
-
-        let owingExpenseDataArray = []
-
-        let currentUsername = this.props.user.username
-
-        await axios.get("/expenses/owing/" + currentUsername).then(
-            res => {
-
-                this.setHasExpensesToBePaid(true)
-                res.data.forEach((expenseJson) => {
-                    // for each expense object that the current user is the payer user
-
-                    let hasSettled = true
-                    let date = expenseJson.date
-                    let description = (expenseJson.description) ? expenseJson.description : "No description" 
-                    let amount = "$ " +  expenseJson.amount.toFixed(2)
-                    let expenseId = expenseJson.id
-
-                    expenseJson.borrowerDataList.forEach((borrowerData) => {
-
-                        // if any of the borrowers haven't paid, hasSettled will end up being false
-                        hasSettled = hasSettled & borrowerData.hasPaid
-                        
-
-                    })
-
-                    hasSettled = (hasSettled == 1) ? "settled" : "outstanding"
-
-                    let dataJson = {
-                        hasSettled: hasSettled,
-                        date: date,
-                        description: description,
-                        amount: amount,
-                        expenseId: expenseId
-                    }
-
-                    owingExpenseDataArray.push(dataJson)
-
-                })
-
-                // need to store date, description, amount, if every user has paid
-                // to see if every user paid, iterate through borrowerDataList to see if hasPaid = true for all
-
-                this.setOwingExpenses(owingExpenseDataArray)
-            },
-            err => {
-                if (err.response.status == 404) {
-                    this.setHasExpensesToBePaid(false)
-                    this.setOwingExpenses([])
-                }
-                console.log(err)
-            }
-        )
-
     }
 
     fetchAllUsers = async () => {
@@ -109,73 +45,114 @@ export default class Dashboard extends Component {
         )
     }
 
-    fetchOwedExpenses = async () => {
+    fetchExpenses = async (isExpensesToPay) => {
+        // isExpensesToPay == true if fetching all the expenses that the user has to pay back
 
-        // user owes ppl money
+        let expenseDataArray = []
 
         let currentUsername = this.props.user.username
-        let owedExpenseDataArray = []
 
-        console.log("fetched owed expenses")
-        await axios.get("/expenses/owed/" + currentUsername).then(
+        let endpoint = ""
+
+        if (isExpensesToPay) {
+            endpoint = "/expenses/owed/" + currentUsername
+        } else {
+            endpoint = "/expenses/owing/" + currentUsername
+        }
+
+        await axios.get(endpoint).then(
             res => {
 
-                this.setHasExpensesToPay(true)
+                isExpensesToPay ? this.setHasExpensesToPay(true) : this.setHasExpensesToBePaid(true) 
 
                 res.data.forEach((expenseJson) => {
-                    // for each expense object that the current user is owing to 
-                    //owedHeaders = ["Date","Description","Owed to","Amount","Paid"]
+                    // for each expense object that the current user is the payer user
 
-                    let hasSettled = false
+                    let hasSettled = true // true by default for the isExpensesToPay case
                     let date = expenseJson.date
                     let description = (expenseJson.description) ? expenseJson.description : "No description" 
-                    let amount = "$ "
-                    let owedTo = expenseJson.payerUsername
+                    let amount = isExpensesToPay ? "$ " : parseFloat(expenseJson.amount)
                     let expenseId = expenseJson.id
 
                     expenseJson.borrowerDataList.forEach((borrowerData) => {
-
-
-
                         // if any of the borrowers haven't paid, hasSettled will end up being false
-                        if (borrowerData.username == currentUsername) {
-                            hasSettled = borrowerData.hasPaid
-                            amount +=  borrowerData.amount.toFixed(2)
-                        }
 
+                        if (!isExpensesToPay) {
+                            // case ppl owe user money
+                            hasSettled = hasSettled & borrowerData.hasPaid
+                            if (borrowerData.hasPaid) {
+                                amount -= parseFloat(borrowerData.amount)
+                            }
+                        } else {
+                            // case user owes money to others
+                            if (borrowerData.username === currentUsername) {
+                                hasSettled = borrowerData.hasPaid
+                                amount +=  borrowerData.amount.toFixed(2)
+                            }
+                        }
                     })
 
-                    hasSettled = (hasSettled == true) ? "paid" : "unpaid"
+                    if (!isExpensesToPay) {
+                        if (hasSettled) {
+                            amount = "$ 0.00"
+                            hasSettled = "Settled :)"
+                        } else {
+                            amount = "$ " + amount.toFixed(2)
+                            hasSettled = "Outstanding :("
+                        }
+                    } else {
+                        hasSettled = (hasSettled === true) ? "Paid :)" : "Unpaid :("
+                    }
 
                     let dataJson = {
                         hasSettled: hasSettled,
                         date: date,
                         description: description,
                         amount: amount,
-                        owedTo: owedTo,
                         expenseId: expenseId
                     }
 
-                    owedExpenseDataArray.push(dataJson)
+                    expenseDataArray.push(dataJson)
 
                 })
-
-                // res.data is a json array
-                //console.log(res.data)
-                // owingHeaders = ["Date","Description", "Amount","Settled"]
 
                 // need to store date, description, amount, if every user has paid
                 // to see if every user paid, iterate through borrowerDataList to see if hasPaid = true for all
 
-                this.setOwedExpenses(owedExpenseDataArray)
+                isExpensesToPay? this.setOwedExpenses(expenseDataArray) : this.setOwingExpenses(expenseDataArray)
             },
             err => {
-                if (err.response.status == 404) {
-                    this.setHasExpensesToPay(false)
-                    this.setOwedExpenses([])
+                if (err.response.status === 404) {
+                    if (isExpensesToPay) {
+                        // case no expenses to pay
+                        this.setHasExpensesToPay(false)
+                        this.setOwedExpenses([])
+                    } else {
+                        // case no expenses to be paid
+                        this.setHasExpensesToBePaid(false)
+                        this.setOwingExpenses([])
+                    }
                 }
+                console.log(err)
             }
         )
+
+
+    }
+
+    fetchOwingExpenses = async () => {
+        // people owe the user money
+        //isExpensesToPay == false here 
+        console.log("fetched owing expenses")
+        this.fetchExpenses(false)
+
+    }
+
+    fetchOwedExpenses = async () => {
+
+        // user owes ppl money
+        console.log("fetched owed expenses")
+        this.fetchExpenses(true)
 
     }
 
@@ -285,9 +262,6 @@ export default class Dashboard extends Component {
             this.setShowDelete(true)
         }
 
-        // unshow the delete modal after a delay
-        // are you sure you want to delete _____? this will delete it for everyone involved.
-
     }
 
 
@@ -300,11 +274,6 @@ export default class Dashboard extends Component {
     render() {
 
         // window.scrollTo(0, 0)
-
-        // if (!this.props.user) {
-        //     // case not logged in
-        //     return <Navigate to={'/'}/>
-        // }
 
         if (!this.props.user) {
             // case not logged in
@@ -331,11 +300,8 @@ export default class Dashboard extends Component {
             <>
             
             <div className='dashboard-padding'/>
-
             <div className='dashboard-container'>
-
                 <div className='owed-container'> 
-
                     {this.state.hasExpensesToPay?
                         <>
                         <h3> Expenses I need to pay back</h3>
@@ -351,11 +317,8 @@ export default class Dashboard extends Component {
                         </>
                         :
                         <h3>You don't need to pay back anyone :)</h3>}
-
                 </div>
-
             </div>
-
             <div className='dashboard-padding' />
 
             <div className='dashboard-container'>
@@ -377,20 +340,22 @@ export default class Dashboard extends Component {
 
                 </div>
             </div>
-            
             <div className='modal-container'>
-
-            <AddModal editExpenseData={this.state.editExpenseData} isAdd={false} users={this.state.users} show={this.state.showEdit} setShow={this.setShowEdit} currentUser={this.props.user}></AddModal>
+            <AddModal 
+                editExpenseData={this.state.editExpenseData} 
+                isAdd={false} 
+                users={this.state.users} 
+                show={this.state.showEdit} 
+                setShow={this.setShowEdit} 
+                currentUser={this.props.user}/>
             <DeleteModal 
                 show={this.state.showDelete} 
                 setShow={this.setShowDelete} 
                 setConfirmDelete={this.setConfirmDelete}
                 handleDelete={this.handleDelete}
                 description={this.state.deleteDescription} 
-                expenseId={this.state.deleteExpenseId}>
-            </DeleteModal>
+                expenseId={this.state.deleteExpenseId}/>
             </div>
-
             <div className='dashboard-padding' />
             </>
         )

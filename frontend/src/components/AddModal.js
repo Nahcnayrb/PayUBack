@@ -4,16 +4,12 @@ import Modal from 'react-bootstrap/Modal';
 import CurrencyInput from 'react-currency-input-field';
 import Select from 'react-select'
 import NextModal from './NextModal';
-import { CompareSharp } from '@material-ui/icons';
-import { toHaveStyle } from '@testing-library/jest-dom/matchers';
 
 export default class AddModal extends Component {
 
     
     state = {
         hasLoadedData:false
-
-    
     }
 
     resetDate = () => {
@@ -21,7 +17,6 @@ export default class AddModal extends Component {
         var curr = new Date();
         curr.setDate(curr.getDate());
         var date = curr.toISOString().substring(0,10);
-
         this.setState({date: date})
 
     }
@@ -31,8 +26,6 @@ export default class AddModal extends Component {
         this.clearMessages()
         this.clearAddData()
         this.resetDate()
-
-
     }
 
     handleNext = () => {
@@ -100,7 +93,7 @@ export default class AddModal extends Component {
             // curr total amount should match fetched total amount 
             // if not we have significant change
 
-            if (fetchedTotal != currTotal) {
+            if (fetchedTotal !== currTotal) {
 
                 // case total has been changed
                 // dont need to check involved users
@@ -110,7 +103,7 @@ export default class AddModal extends Component {
                 // need to check involved users
 
 
-                if (currUserList.length == borrowerDataList.length) {
+                if (currUserList.length === borrowerDataList.length) {
 
                     currUserList.forEach((involvedUser) => {
                         involvedUserSet.add(involvedUser.value)
@@ -237,13 +230,12 @@ export default class AddModal extends Component {
          value: payerUsername,
          label: payerLabel
         }
-        let payerUserIsAssigned = false
 
         borrowerDataList.forEach((borrowerData) => {
 
          allUsers.forEach((user) => {
 
-             if (user.username == borrowerData.username) {
+             if (user.username === borrowerData.username) {
                  involvedUsersOptions.push(this.createOption(user))
              }
          })
@@ -269,9 +261,9 @@ export default class AddModal extends Component {
 
         for (let i = 0; i < allUsers.length; i++) {
             let user = allUsers[i]
-            if (user.username == username) {
+            if (user.username === username) {
                 let name = ""
-                if (username == this.props.currentUser.username) {
+                if (username === this.props.currentUser.username) {
                     // case user is logged in user
                     name = "Me"
                 } else {

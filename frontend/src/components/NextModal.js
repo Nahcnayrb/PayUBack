@@ -20,7 +20,6 @@ export default class NextModal extends Component {
     constructor(props) {
         super(props)
 
-
         // by default, split equally if is add modal
 
         if (this.props.isAdd || this.props.editMadeChanges) {
@@ -58,15 +57,6 @@ export default class NextModal extends Component {
         } else {
             // case edit
             // load rows
-            // case 1: numerical data/payer user is unchanged from original 
-            // this means payer, # of involved users, & total amount are the same
-            // use editExpense for hasPaid / amount / total
-            
-            // case 2: numerical data/payer user got changed from original 
-            //          we ignore original borrowerDataList and use this.props.involvedUsers
-
-            // if we're in this case, we're in edit and no significant changes have been made
-            // 
 
             let rows = []
             let expenseJson = this.props.editExpenseData
@@ -76,7 +66,7 @@ export default class NextModal extends Component {
             let remaining = total
             let resetAmounts = false
 
-            if (this.props.originalTotal != total) {
+            if (this.props.originalTotal !== total) {
                 // case the total was changed by user 
                 resetAmounts = true
             }
@@ -87,7 +77,7 @@ export default class NextModal extends Component {
                 let label = this.getLabel(borrowerUsername)
                 let hasPaid = borrower.hasPaid
 
-                if (borrower.username == this.props.payerUser.value) {
+                if (borrower.username === this.props.payerUser.value) {
                     hasPaid = true
                 }
 
@@ -129,9 +119,9 @@ export default class NextModal extends Component {
 
         for (let i = 0; i < allUsers.length; i++) {
             let user = allUsers[i]
-            if (user.username == username) {
+            if (user.username === username) {
                 let name = ""
-                if (username == this.props.currentUser.username) {
+                if (username === this.props.currentUser.username) {
                     // case user is logged in user
                     name = "Me"
                 } else {
@@ -174,7 +164,7 @@ export default class NextModal extends Component {
         rows.forEach((row) => {
             row.amount = amountPerUser
             remaining = parseFloat((remaining - amountPerUser).toFixed(2))
-            if ((remaining != 0) && (currIndex == rows.length - 1)) {
+            if ((remaining !== 0) && (currIndex === rows.length - 1)) {
                 // case we have remaining value and we're on the last row
                 row.amount = parseFloat((row.amount + remaining).toFixed(2))
 
@@ -267,8 +257,8 @@ export default class NextModal extends Component {
 
         let remaining = parseFloat(this.state.remaining)
 
-        remaining += (oldAmount == undefined) ? 0: parseFloat(oldAmount)
-        remaining -= (amount == undefined) ? 0 : parseFloat(amount)
+        remaining += (oldAmount === undefined) ? 0: parseFloat(oldAmount)
+        remaining -= (amount === undefined) ? 0 : parseFloat(amount)
 
         this.setRemaining(remaining)
         this.updateUserAmount(username, amount)
@@ -294,7 +284,9 @@ export default class NextModal extends Component {
 
         let hasRemainingAmountErrorMessage = ""
 
-        if (this.state.remaining != 0) {
+        let currRemaining = parseFloat(this.state.remaining)
+
+        if (currRemaining.toFixed(2) !== '0.00') {
             hasRemainingAmountErrorMessage = "Amount split between involved users must add up to the total amount"
         }
 
@@ -303,7 +295,7 @@ export default class NextModal extends Component {
             hasRemainingAmountErrorMessage: hasRemainingAmountErrorMessage
         })
 
-        if (hasRemainingAmountErrorMessage.length != 0) {
+        if (hasRemainingAmountErrorMessage.length !== 0) {
             return
         }
 
@@ -321,16 +313,16 @@ export default class NextModal extends Component {
 
         })
 
+        const data = {
+            payerUsername: this.props.payerUser.value,
+            borrowerDataList : borrowerDataArray,
+            amount: this.props.amount,
+            date: this.props.date,
+            description: this.props.description
+        }
+
 
         if (this.props.isAdd) {
-
-            const data = {
-                payerUsername: this.props.payerUser.value,
-                borrowerDataList : borrowerDataArray,
-                amount: this.props.amount,
-                date: this.props.date,
-                description: this.props.description
-            }
 
             await axios.post('/expenses/add', data).then(
                 res => {
@@ -344,14 +336,8 @@ export default class NextModal extends Component {
         } else {
 
             let expenseID = this.props.editExpenseData.id
-            const data = {
-                id: expenseID,
-                payerUsername: this.props.payerUser.value,
-                borrowerDataList : borrowerDataArray,
-                amount: this.props.amount,
-                date: this.props.date,
-                description: this.props.description
-            }
+
+            data['id'] = expenseID
             // case edit save
             await axios.put('/expenses/' + expenseID, data).then(
                 res => {

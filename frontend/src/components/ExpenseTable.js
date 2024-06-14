@@ -2,7 +2,6 @@ import {React, Component } from "react";
 
 import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
-import Checkbox from '@mui/material/Checkbox';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
@@ -35,13 +34,13 @@ export default class ExpenseTable extends Component {
                         <Td>{row.hasSettled}</Td>
 
                         <Td>
-                            <Button variant="contained" onClick={ () => { this.props.handleClickEdit(row.expenseId) }}>
+                            <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.props.handleClickEdit(row.expenseId) }}>
                                 <ModeEditIcon fontSize="small"/>
                                 <label>Edit</label>
                             </Button>
                         </Td>
                         <Td>
-                            <Button variant="contained" onClick={ () => {this.props.handleDelete(row.expenseId, row.description)}}>
+                            <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => {this.props.handleDelete(row.expenseId, row.description)}}>
                                 <DeleteIcon fontSize="small"/>
                                 <label>Delete</label>
                             </Button>
