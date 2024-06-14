@@ -95,13 +95,13 @@ export default class Dashboard extends Component {
                     if (!isExpensesToPay) {
                         if (hasSettled) {
                             amount = "$ 0.00"
-                            hasSettled = "settled"
+                            hasSettled = "Settled :)"
                         } else {
                             amount = "$ " + amount.toFixed(2)
-                            hasSettled = "outstanding"
+                            hasSettled = "Outstanding :("
                         }
                     } else {
-                        hasSettled = (hasSettled === true) ? "paid" : "unpaid"
+                        hasSettled = (hasSettled === true) ? "Paid :)" : "Unpaid :("
                     }
 
                     let dataJson = {
