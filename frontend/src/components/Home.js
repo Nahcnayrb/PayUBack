@@ -1,7 +1,6 @@
 import { React, Component } from "react";
 import { Button } from '@mui/material';
 import Modal from 'react-bootstrap/Modal';
-import axios from "axios";
 import { Link } from "react-router-dom"
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';

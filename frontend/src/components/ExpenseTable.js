@@ -2,7 +2,6 @@ import {React, Component } from "react";
 
 import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
-import Checkbox from '@mui/material/Checkbox';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';

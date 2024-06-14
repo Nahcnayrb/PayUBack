@@ -1,7 +1,6 @@
 import {React, Component } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
-import Home from "./Home";
 
 export default class Login extends Component {
     state = {}
@@ -30,7 +29,7 @@ export default class Login extends Component {
                 this.setState({
                     message: err.response.data.message
                 })
-                if (err.response.status == 401) {
+                if (err.response.status === 401) {
                     this.setState({
                         message: "username or password is incorrect."
                     })

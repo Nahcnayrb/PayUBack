@@ -1,13 +1,8 @@
 import React,{Component} from 'react'
-import { Button, Checkbox } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
-import { Navigate } from 'react-router-dom';
 import AddModal from './AddModal';
 import axios from 'axios';
-import { DataGrid } from '@mui/x-data-grid';
 import ExpenseTable from './ExpenseTable';
 import DeleteModal from './DeleteModal';
-import { ThirtyFpsOutlined } from '@mui/icons-material';
 
 
 export default class Dashboard extends Component {
@@ -63,7 +58,7 @@ export default class Dashboard extends Component {
 
                     })
 
-                    hasSettled = (hasSettled == 1) ? "settled" : "outstanding"
+                    hasSettled = (hasSettled === 1) ? "settled" : "outstanding"
 
                     let dataJson = {
                         hasSettled: hasSettled,
@@ -83,7 +78,7 @@ export default class Dashboard extends Component {
                 this.setOwingExpenses(owingExpenseDataArray)
             },
             err => {
-                if (err.response.status == 404) {
+                if (err.response.status === 404) {
                     this.setHasExpensesToBePaid(false)
                     this.setOwingExpenses([])
                 }
@@ -138,14 +133,14 @@ export default class Dashboard extends Component {
 
 
                         // if any of the borrowers haven't paid, hasSettled will end up being false
-                        if (borrowerData.username == currentUsername) {
+                        if (borrowerData.username === currentUsername) {
                             hasSettled = borrowerData.hasPaid
                             amount +=  borrowerData.amount.toFixed(2)
                         }
 
                     })
 
-                    hasSettled = (hasSettled == true) ? "paid" : "unpaid"
+                    hasSettled = (hasSettled === true) ? "paid" : "unpaid"
 
                     let dataJson = {
                         hasSettled: hasSettled,
@@ -170,7 +165,7 @@ export default class Dashboard extends Component {
                 this.setOwedExpenses(owedExpenseDataArray)
             },
             err => {
-                if (err.response.status == 404) {
+                if (err.response.status === 404) {
                     this.setHasExpensesToPay(false)
                     this.setOwedExpenses([])
                 }

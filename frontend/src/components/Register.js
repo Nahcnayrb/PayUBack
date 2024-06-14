@@ -1,7 +1,6 @@
 import { React, Component } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
-import Alert from '@mui/material/Alert';
 
 export default class Register extends Component {
 
@@ -58,7 +57,7 @@ export default class Register extends Component {
             }
         ).catch(
             err => {
-                if (err.response.status == 409) {
+                if (err.response.status === 409) {
                     console.log("username is already taken")
                     registerFailMessage = "username is already taken."
                     this.setState({
