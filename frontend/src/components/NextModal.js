@@ -326,7 +326,7 @@ export default class NextModal extends Component {
 
             await axios.post('/expenses/add', data).then(
                 res => {
-                    console.log(res)
+
                 }
             ).catch(
                 err => {
@@ -340,8 +340,9 @@ export default class NextModal extends Component {
             data['id'] = expenseID
             // case edit save
             await axios.put('/expenses/' + expenseID, data).then(
-                res => {
-                    console.log(res)
+                res => { 
+                    this.props.updateExpenses()
+                  
                 }
             ).catch(
                 err => {

@@ -128,7 +128,6 @@ export default class Dashboard extends Component {
 
         await axios.get(endpoint).then(
             res => {
-
                 isExpensesToPay ? this.setHasExpensesToPay(true) : this.setHasExpensesToBePaid(true) 
 
                 res.data.forEach((expenseJson) => {
@@ -239,7 +238,6 @@ export default class Dashboard extends Component {
 
                     })
                 } else {
-                    console.log(usersViewArray)
                     this.setOwingExpenses(expenseDataArray)
                     this.setToBePaidUsersArray(usersViewArray)
                     this.setState({
@@ -298,20 +296,9 @@ export default class Dashboard extends Component {
             hasExpensesToBePaid: hasExpenses
         })
     }
-    setShow = show => {
-
-
-        this.updateExpenses()
-
-        this.setState({
-          show: show
-        })
-    }
 
     setShowEdit = show => {
 
-
-        this.updateExpenses()
 
         this.setState({
             showEdit: show
@@ -350,7 +337,6 @@ export default class Dashboard extends Component {
     }
 
     setShowDelete = (show) => {
-        this.updateExpenses()
         this.setState({
             showDelete: show
         })
@@ -376,7 +362,6 @@ export default class Dashboard extends Component {
             // case user clicked confirm on delete modal
             await axios.delete("/expenses/" + expenseId).then(
                 res => {
-    
                     this.updateExpenses()
                     this.setShowDelete(false)
                     this.setConfirmDelete(false)
@@ -396,16 +381,12 @@ export default class Dashboard extends Component {
     }
 
     handlePayExpensesToggle = (isTurnedOn) => {
-        console.log("in handle pay expenses toggle ")
-        console.log(isTurnedOn)
         this.setState({
             payExpensesToggle: isTurnedOn
         })
     }
 
     handleExpensesToBePaidToggle = (isTurnedOn) => {
-        console.log("in handle expenses to be paid toggle ")
-        console.log(isTurnedOn)
         this.setState({
             expensesToBePaidToggle: isTurnedOn
         })
@@ -513,14 +494,16 @@ export default class Dashboard extends Component {
                 users={this.props.users} 
                 show={this.state.showEdit} 
                 setShow={this.setShowEdit} 
-                currentUser={this.props.user}/>
+                currentUser={this.props.user}
+                updateExpenses={this.updateExpenses}/>
             <DeleteModal 
                 show={this.state.showDelete} 
                 setShow={this.setShowDelete} 
                 setConfirmDelete={this.setConfirmDelete}
                 handleDelete={this.handleDelete}
                 description={this.state.deleteDescription} 
-                expenseId={this.state.deleteExpenseId}/>
+                expenseId={this.state.deleteExpenseId}
+                updateExpenses={this.updateExpenses}/>
             </div>
             <div className='dashboard-padding' />
             </>

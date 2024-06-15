@@ -372,6 +372,7 @@ export default class AddModal extends Component {
                     users={this.props.users}
                     originalTotal={this.state.fetchedTotal}
                     editMadeChanges={this.state.editMadeChanges}
+                    updateExpenses={this.props.updateExpenses}
                  ></NextModal>
             )
 
