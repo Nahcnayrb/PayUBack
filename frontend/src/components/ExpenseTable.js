@@ -50,8 +50,6 @@ export default class ExpenseTable extends Component {
 
                     </Tr>
 
-
-
                 ))}
               </Tbody>
               :
