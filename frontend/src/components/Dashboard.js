@@ -5,6 +5,7 @@ import ExpenseTable from './ExpenseTable';
 import DeleteModal from './DeleteModal';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Divider from '@mui/material/Divider';
 
 export default class Dashboard extends Component {
 
@@ -450,8 +451,12 @@ export default class Dashboard extends Component {
                         <>
                        
                         <h3>
-                            Expenses to pay: ${this.state.toPayTotal.toFixed(2)} total
+                            Expenses to pay:
                         </h3>
+                        <h3>
+                            Total ${this.state.toPayTotal.toFixed(2)}
+                        </h3>
+                        <Divider sx={{ borderBottomWidth: 5 }}/>  
                         <FormControlLabel control={<Switch defaultChecked onChange={e => {this.handlePayExpensesToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users"/>
                         <ExpenseTable 
                             headers={this.state.payExpensesToggle? this.userViewHeaders : this.owedHeaders}
@@ -478,8 +483,10 @@ export default class Dashboard extends Component {
                     {this.state.hasExpensesToBePaid?
                         <>
                         <h3>
-                            Expenses to be paid back: ${this.state.toBePaidTotal.toFixed(2)} total
+                            Expenses to be paid back:
                         </h3>
+                        <h3>Total ${this.state.toBePaidTotal.toFixed(2)}</h3>
+                        <Divider sx={{ borderBottomWidth: 5 }}/>  
                         <FormControlLabel control={<Switch defaultChecked onChange={ e => {this.handleExpensesToBePaidToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users" />
                         <ExpenseTable 
                             headers={this.state.expensesToBePaidToggle? this.userViewHeaders : this.owingHeaders}
