@@ -23,11 +23,13 @@ export default class ExpenseTable extends Component {
             )
         }
 
+        let headersToUse = this.props.toggleIsOn ? this.props.userViewHeaders : this.props.headers
+
         return (
-            <Table className='owing-table' >
+            <Table className='owing-table' key={this.props.toggleIsOn} >
               <Thead>
                 <Tr >
-                    {this.props.headers.map((header) => (
+                    {headersToUse.map((header) => (
                         <Th key={header}>
                             <h3 id="data-header" key={header}>{header}</h3>
                         </Th>
