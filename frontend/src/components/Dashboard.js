@@ -60,8 +60,6 @@ export default class Dashboard extends Component {
 
         let allUsers = this.props.users
 
-
-
         for (let i = 0; i < allUsers.length; i++) {
             let user = allUsers[i]
             if (user.username === username) {
