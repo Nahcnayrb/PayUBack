@@ -7,7 +7,7 @@ import Home from './components/Home';
 import Nav from './components/Nav';
 import Register from './components/Register';
 import Login from './components/Login';
-import { BrowserRouter,Routes,Route } from 'react-router-dom';
+import { Routes,Route } from 'react-router-dom';
 import { HashRouter } from 'react-router-dom';
 import axios from 'axios';
 import Dashboard from './components/Dashboard';
@@ -20,15 +20,14 @@ export default class App extends Component {
 
   componentDidMount() {
     const token = localStorage.getItem("token")
+    if (!this.state.fetchedUsers) {
+      this.fetchAllUsers()
+    }
     if (token !== null) {
       axios.get('login/' + token).then(
           res => {
               this.setUser(res.data)
-              if (!this.state.fetchedUsers) {
-                this.fetchAllUsers()
-              }
               setTimeout(()=>{}, 500)
-              //this.fetchAllUsers()
           },
           err => {
               console.log(err)
@@ -62,20 +61,6 @@ setUser = user => {
 
   render() {
     return (
-        //   <BrowserRouter>
-          
-        //       <div className='App'>
-        //         <Nav user={this.state.user} setUser={this.setUser} users={this.state.users}/>
-
-        //             <Routes>
-        //               <Route exact path='/' element={<Home user={this.state.user}/>}/>
-        //               <Route exact path='/login' element={<Login setUser={this.setUser}/>}/>
-        //               <Route exact path='/register' element={<Register setUser={this.setUser}/>}/>
-        //               <Route exact path='/dashboard' element={<Dashboard user={this.state.user} users={this.state.users}/>}></Route>
-        //             </Routes>
-      
-        //       </div>
-        // </BrowserRouter>
 
         <HashRouter>
           
