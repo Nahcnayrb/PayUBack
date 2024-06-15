@@ -5,7 +5,6 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import axios from 'axios';
 
-
 axios.defaults.baseURL='https://payuback2.calmforest-2dc5e7fc.eastus2.azurecontainerapps.io/'
 axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*"
 

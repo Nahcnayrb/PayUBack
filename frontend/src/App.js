@@ -8,6 +8,7 @@ import Nav from './components/Nav';
 import Register from './components/Register';
 import Login from './components/Login';
 import { BrowserRouter,Routes,Route } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import axios from 'axios';
 import Dashboard from './components/Dashboard';
 
@@ -61,20 +62,35 @@ setUser = user => {
 
   render() {
     return (
-          <BrowserRouter>
+        //   <BrowserRouter>
           
-              <div className='App'>
-                <Nav user={this.state.user} setUser={this.setUser} users={this.state.users}/>
+        //       <div className='App'>
+        //         <Nav user={this.state.user} setUser={this.setUser} users={this.state.users}/>
 
-                    <Routes>
-                      <Route exact path='/' element={<Home user={this.state.user}/>}/>
-                      <Route exact path='/login' element={<Login setUser={this.setUser}/>}/>
-                      <Route exact path='/register' element={<Register setUser={this.setUser}/>}/>
-                      <Route exact path='/dashboard' element={<Dashboard user={this.state.user} users={this.state.users}/>}></Route>
-                    </Routes>
+        //             <Routes>
+        //               <Route exact path='/' element={<Home user={this.state.user}/>}/>
+        //               <Route exact path='/login' element={<Login setUser={this.setUser}/>}/>
+        //               <Route exact path='/register' element={<Register setUser={this.setUser}/>}/>
+        //               <Route exact path='/dashboard' element={<Dashboard user={this.state.user} users={this.state.users}/>}></Route>
+        //             </Routes>
       
-              </div>
-        </BrowserRouter>
+        //       </div>
+        // </BrowserRouter>
+
+        <HashRouter>
+          
+        <div className='App'>
+          <Nav user={this.state.user} setUser={this.setUser} users={this.state.users}/>
+
+              <Routes>
+                <Route exact path='/' element={<Home user={this.state.user}/>}/>
+                <Route exact path='/login' element={<Login setUser={this.setUser}/>}/>
+                <Route exact path='/register' element={<Register setUser={this.setUser}/>}/>
+                <Route exact path='/dashboard' element={<Dashboard user={this.state.user} users={this.state.users}/>}></Route>
+              </Routes>
+
+        </div>
+      </HashRouter>
         
       )}
 
