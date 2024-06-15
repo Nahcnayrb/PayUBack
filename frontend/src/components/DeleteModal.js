@@ -13,7 +13,6 @@ export default class DeleteModal extends Component {
 
 
     handleClick = () => {
-        console.log("confirm clicked!")
         this.setState({
             confirmClicked: true
         })

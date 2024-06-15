@@ -50,7 +50,7 @@ export default class Register extends Component {
 
         axios.post('users/add', data).then(
             res => {
-                console.log(res)
+                console.log("register account api call")
                 this.setState({
                     registered: true
                 })

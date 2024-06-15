@@ -18,6 +18,7 @@ export default class Login extends Component {
 
         axios.post('login/authenticate', data).then(
             res => {
+                console.log("authentication api call")
                 localStorage.setItem("token", res.data.token)
                 this.setState({
                     loggedIn: true
