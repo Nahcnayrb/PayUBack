@@ -438,7 +438,7 @@ export default class Dashboard extends Component {
                         <Divider sx={{ borderBottomWidth: 5 }}/>  
                         <FormControlLabel control={<Switch defaultChecked onChange={e => {this.handlePayExpensesToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users"/>
                         <ExpenseTable 
-                            headers={this.state.payExpensesToggle? this.userViewHeaders : this.owedHeaders}
+                            headers={this.owedHeaders}
                             rows={this.state.owedExpenseDataArray} 
                             isOwed={true} 
                             handleEdit={this.handleEdit} 
@@ -447,7 +447,8 @@ export default class Dashboard extends Component {
                             toggleIsOn={this.state.payExpensesToggle}
                             usersViewArray={this.state.toPayUsersArray}
                             handleDetails={this.handleDetails}
-                            usersEmptyMessage={"You're all paid up :)"}>
+                            usersEmptyMessage={"You're all paid up :)"}
+                            userViewHeaders={this.userViewHeaders}>
 
                         </ExpenseTable>
                         </>
@@ -468,7 +469,7 @@ export default class Dashboard extends Component {
                         <Divider sx={{ borderBottomWidth: 5 }}/>  
                         <FormControlLabel control={<Switch defaultChecked onChange={ e => {this.handleExpensesToBePaidToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users" />
                         <ExpenseTable 
-                            headers={this.state.expensesToBePaidToggle? this.userViewHeaders : this.owingHeaders}
+                            headers={this.owingHeaders}
                             rows={this.state.owingExpenseDataArray} 
                             isOwed={false} 
                             handleEdit={this.handleEdit} 
@@ -477,7 +478,8 @@ export default class Dashboard extends Component {
                             toggleIsOn={this.state.expensesToBePaidToggle}
                             usersViewArray={this.state.toBePaidUsersArray}
                             handleDetails={this.handleDetails}
-                            usersEmptyMessage={"All users have paid you back :)"}>
+                            usersEmptyMessage={"All users have paid you back :)"}
+                            userViewHeaders={this.userViewHeaders}>
                         </ExpenseTable>
                         </>
                         :
