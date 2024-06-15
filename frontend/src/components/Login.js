@@ -24,7 +24,7 @@ export default class Login extends Component {
                     loggedIn: true
                 })
                 this.props.setUser(res.data)
-                window.location.assign("/")
+                //window.location.assign("/")
             }
         ).catch(
             err => {

@@ -5,6 +5,7 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import { Button } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import AddModal from "./AddModal";
+import { Navigate } from "react-router-dom";
 export default class Nav extends Component {
 
   state = {
@@ -26,7 +27,7 @@ export default class Nav extends Component {
     handleLogout = () => {
       localStorage.removeItem("token")
       this.props.setUser(null)
-      window.location.assign("/")
+      //window.location.assign("/")
 
     }
 

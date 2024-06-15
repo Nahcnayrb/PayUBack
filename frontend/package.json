@@ -32,9 +32,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "predeploy": "npm run build",
+    "predeploy": "npm run ghBuild",
     "deploy": "gh-pages -d build",
-    "build": "react-scripts build",
+    "ghBuild": "react-scripts build",
+    "build": "CI=false && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
