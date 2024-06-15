@@ -14,6 +14,15 @@ export default class ExpenseTable extends Component {
 
     render() {
 
+        // when user clicks on "details", we can just use the list of expenses passed (rows) to search for all the expenses that is associated
+        // ex. only show the ones that satisfy inside the modal
+
+        if ((this.props.toggleIsOn) && (this.props.usersViewArray.length === 0)) {
+            return (
+                <h3>{this.props.usersEmptyMessage}</h3>
+            )
+        }
+
         return (
             <Table className='owing-table' >
               <Thead>
@@ -25,6 +34,27 @@ export default class ExpenseTable extends Component {
                     ))}
                 </Tr>
               </Thead>
+              {this.props.toggleIsOn?
+              <Tbody>
+                {this.props.usersViewArray.map((row) => (
+                    <Tr key={row.username}>
+                        <Td>{row.label}</Td>
+                        <Td>{row.amount}</Td>
+
+                        <Td>
+                            <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.props.handleDetails(row.username) }}>
+                                <ModeEditIcon fontSize="small"/>
+                                <label>Details</label>
+                            </Button>
+                        </Td>
+
+                    </Tr>
+
+
+
+                ))}
+              </Tbody>
+              :
               <Tbody>
                 {this.props.rows.map((row) => (
                     <Tr key={row.expenseId}>
@@ -51,6 +81,7 @@ export default class ExpenseTable extends Component {
 
                 ))}
               </Tbody>
+    }
             </Table>
         )}
 

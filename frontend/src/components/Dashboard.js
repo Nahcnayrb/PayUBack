@@ -12,11 +12,36 @@ export default class Dashboard extends Component {
         hasFetched:false,
         owedExpenseDataArray:[],
         owingExpenseDataArray:[],
+        toPayUsersArray:[],
+        toBePaidUsersArray:[],
+        expensesToBePaidToggle: true,
+        payExpensesToggle: true,
+        users: this.props.users
     };
 
-    owedHeaders = ["Date","Description","Balance","Status"]
-    owingHeaders = ["Date","Description", "Balance","Status"]
+            // in the group by users view for to pay:
+        // user's name (first + last)
+        // remaining balance
 
+        // in the group by users view for to be paid:
+        // user's name (first + last)
+        // remaining balance
+
+    owedHeaders = ["Date","Description","To Pay","Status"]
+    owingHeaders = ["Date","Description", "Balance","Status"]
+    userViewHeaders =["User", "Outstanding Balance"]
+
+    setToPayUsersArray = (toPayUsers) => {
+        this.setState({
+            toPayUsersArray: toPayUsers
+        })
+    }
+
+    setToBePaidUsersArray = (toBePaidUsers) => {
+        this.setState({
+            toBePaidUsersArray: toBePaidUsers
+        })
+    }
 
     setOwingExpenses = (owingExpenses) => {
         this.setState({
@@ -30,20 +55,30 @@ export default class Dashboard extends Component {
         })
     }
 
-    fetchAllUsers = async () => {
+    getLabel = (username) => {
 
-        await axios.get('users').then(
-            res => {
-                // res.data is a json array
-                this.setState({
-                    users: res.data
-                })
-  
-            },
-            err => {
-                console.log(err)
-            }
-        )
+        let allUsers = this.props.users
+
+
+
+        for (let i = 0; i < allUsers.length; i++) {
+            let user = allUsers[i]
+            if (user.username === username) {
+                let name = ""
+                if (username === this.props.user.username) {
+                    // case user is logged in user
+                    name = "Me"
+                } else {
+                    // found user
+                    name = user.firstName + " " + user.lastName 
+                }
+
+                name += (" (@" + username + ")")
+                return name
+            } 
+        }
+        // case cannot find user
+        return ""
     }
 
     fetchExpenses = async (isExpensesToPay) => {
@@ -61,6 +96,35 @@ export default class Dashboard extends Component {
             endpoint = "/expenses/owing/" + currentUsername
         }
 
+        // initiate hashmap outside of for each expense loop
+        // in the group by users view for to be paid:
+        // isExpenses to pay = false
+        // for each expense
+        //      for each borrower in expense
+        //              if borrower hasn't paid
+        //                  check if hashmap has the borrower
+        //                  case yes: we fetch the current outstanding amount, add to it 
+        //                   case no: we store borrower into hashmap with the curr expense amount
+
+        // at the end of the for each expense loop, we have a hashmap full of borrowers who hasn't paid yet
+
+        // isExpensesToPay == true
+        // initiate hashmap
+        // in the group by users view for to pay:
+        // for each expense
+        //      for each borrower in expense
+        //              if borrower == curr user
+        //                  check if has paid
+        //                      if hasn't paid, we store the payerUsername as key into map
+        //                              value += the amount that user owes for curr expense
+
+
+        let map = new Map()
+
+        let usersViewArray = []
+
+        let currTotal = 0
+
         await axios.get(endpoint).then(
             res => {
 
@@ -74,6 +138,7 @@ export default class Dashboard extends Component {
                     let description = (expenseJson.description) ? expenseJson.description : "No description" 
                     let amount = isExpensesToPay ? "$ " : parseFloat(expenseJson.amount)
                     let expenseId = expenseJson.id
+                    let payerUsername = expenseJson.payerUsername
 
                     expenseJson.borrowerDataList.forEach((borrowerData) => {
                         // if any of the borrowers haven't paid, hasSettled will end up being false
@@ -83,12 +148,41 @@ export default class Dashboard extends Component {
                             hasSettled = hasSettled & borrowerData.hasPaid
                             if (borrowerData.hasPaid) {
                                 amount -= parseFloat(borrowerData.amount)
+                            } else {
+                                currTotal += borrowerData.amount
+                                // borrower has not paid user back for this expense
+                                // we add this amount to map
+                                if (map.has(borrowerData.username)) {
+
+                                     let currAmount = map.get(borrowerData.username)
+                                        currAmount += borrowerData.amount
+                                        map.set(borrowerData.username, currAmount)
+
+                                } else {
+                                    // case map doesn't have borrower yet
+                                    map.set(borrowerData.username, borrowerData.amount)
+
+                                }
                             }
                         } else {
                             // case user owes money to others
                             if (borrowerData.username === currentUsername) {
                                 hasSettled = borrowerData.hasPaid
                                 amount +=  borrowerData.amount.toFixed(2)
+                                if (!hasSettled) {
+                                    // user owes money to current expense payer
+                                    currTotal += borrowerData.amount
+                                    if (map.has(payerUsername)) {
+                                        let currAmount = map.get(payerUsername)
+                                        currAmount += borrowerData.amount
+                                        map.set(payerUsername, currAmount)
+
+                                    } else {
+                                        // map doesn't have payer yet
+                                        map.set(payerUsername, borrowerData.amount)
+                                    }
+
+                                }
                             }
                         }
                     })
@@ -120,7 +214,38 @@ export default class Dashboard extends Component {
                 // need to store date, description, amount, if every user has paid
                 // to see if every user paid, iterate through borrowerDataList to see if hasPaid = true for all
 
-                isExpensesToPay? this.setOwedExpenses(expenseDataArray) : this.setOwingExpenses(expenseDataArray)
+                
+
+                map.forEach((amount, username) => {
+
+                    let label = this.getLabel(username)
+
+                    let dataJson = {
+                        username: username,
+                        label: label,
+                        amount: "$ " + amount.toFixed(2)
+                    }
+
+                    usersViewArray.push(dataJson)
+                })
+
+
+                if (isExpensesToPay) {
+                    this.setOwedExpenses(expenseDataArray)
+                    this.setToPayUsersArray(usersViewArray)
+                    this.setState({
+                        toPayTotal: currTotal
+
+                    })
+                } else {
+                    console.log(usersViewArray)
+                    this.setOwingExpenses(expenseDataArray)
+                    this.setToBePaidUsersArray(usersViewArray)
+                    this.setState({
+                        toBePaidTotal: currTotal
+                    })
+                }
+
             },
             err => {
                 if (err.response.status === 404) {
@@ -128,15 +253,19 @@ export default class Dashboard extends Component {
                         // case no expenses to pay
                         this.setHasExpensesToPay(false)
                         this.setOwedExpenses([])
+                        this.setToPayUsersArray([])
                     } else {
                         // case no expenses to be paid
                         this.setHasExpensesToBePaid(false)
                         this.setOwingExpenses([])
+                        this.setToBePaidUsersArray([])
                     }
                 }
                 console.log(err)
             }
         )
+
+
 
 
     }
@@ -265,11 +394,26 @@ export default class Dashboard extends Component {
 
     }
 
+    handlePayExpensesToggle = (isTurnedOn) => {
+        console.log("in handle pay expenses toggle ")
+        console.log(isTurnedOn)
+        this.setState({
+            payExpensesToggle: isTurnedOn
+        })
+    }
 
-    // edit modal = add modal with edit flag == true
+    handleExpensesToBePaidToggle = (isTurnedOn) => {
+        console.log("in handle expenses to be paid toggle ")
+        console.log(isTurnedOn)
+        this.setState({
+            expensesToBePaidToggle: isTurnedOn
+        })
+    }
 
-    // only difference: create button -> update button
-    // handle update method
+    handleDetails = (username) => {
+
+    }
+
 
 
     render() {
@@ -288,7 +432,6 @@ export default class Dashboard extends Component {
         if (!this.state.hasFetched) {
             // one time execution
             window.scrollTo(0, 0)
-            this.fetchAllUsers()
             this.updateExpenses()
             this.setState({
                 hasFetched: true
@@ -305,15 +448,22 @@ export default class Dashboard extends Component {
                 <div className='owed-container'> 
                     {this.state.hasExpensesToPay?
                         <>
-                        <FormControlLabel control={<Switch defaultChecked />} className="form-control-label" label="Group By Users"/>
-                        <h3> Expenses I need to pay back</h3>
+                       
+                        <h3>
+                            Expenses to pay: ${this.state.toPayTotal.toFixed(2)} total
+                        </h3>
+                        <FormControlLabel control={<Switch defaultChecked onChange={e => {this.handlePayExpensesToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users"/>
                         <ExpenseTable 
-                            headers={this.owedHeaders} 
+                            headers={this.state.payExpensesToggle? this.userViewHeaders : this.owedHeaders}
                             rows={this.state.owedExpenseDataArray} 
                             isOwed={true} 
                             handleEdit={this.handleEdit} 
                             handleDelete={this.handleDelete}
-                            handleClickEdit={this.handleClickEdit}>
+                            handleClickEdit={this.handleClickEdit}
+                            toggleIsOn={this.state.payExpensesToggle}
+                            usersViewArray={this.state.toPayUsersArray}
+                            handleDetails={this.handleDetails}
+                            usersEmptyMessage={"You're all paid up :)"}>
 
                         </ExpenseTable>
                         </>
@@ -327,15 +477,21 @@ export default class Dashboard extends Component {
                 <div className='owing-container'> 
                     {this.state.hasExpensesToBePaid?
                         <>
-                        <FormControlLabel control={<Switch defaultChecked />} label="Group By Users"/>
-                        <h3> Expenses I need to be paid back </h3>
+                        <h3>
+                            Expenses to be paid back: ${this.state.toBePaidTotal.toFixed(2)} total
+                        </h3>
+                        <FormControlLabel control={<Switch defaultChecked onChange={ e => {this.handleExpensesToBePaidToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users" />
                         <ExpenseTable 
-                            headers={this.owingHeaders} 
+                            headers={this.state.expensesToBePaidToggle? this.userViewHeaders : this.owingHeaders}
                             rows={this.state.owingExpenseDataArray} 
                             isOwed={false} 
                             handleEdit={this.handleEdit} 
                             handleDelete={this.handleDelete}
-                            handleClickEdit={this.handleClickEdit}>
+                            handleClickEdit={this.handleClickEdit}
+                            toggleIsOn={this.state.expensesToBePaidToggle}
+                            usersViewArray={this.state.toBePaidUsersArray}
+                            handleDetails={this.handleDetails}
+                            usersEmptyMessage={"All users have paid you back :)"}>
                         </ExpenseTable>
                         </>
                         :
@@ -347,7 +503,7 @@ export default class Dashboard extends Component {
             <AddModal 
                 editExpenseData={this.state.editExpenseData} 
                 isAdd={false} 
-                users={this.state.users} 
+                users={this.props.users} 
                 show={this.state.showEdit} 
                 setShow={this.setShowEdit} 
                 currentUser={this.props.user}/>

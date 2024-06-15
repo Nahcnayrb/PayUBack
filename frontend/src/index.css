@@ -141,6 +141,8 @@ body, html, .App, #root, .auth-wrapper {
   font-size:100%;
   font-family: Helvetica, sans-serif;
   font-weight: 600;
+  padding-left: 60px;
+  padding-right: 70px;
 }
 
 .right-div {
@@ -250,6 +252,10 @@ body, html, .App, #root, .auth-wrapper {
   padding-top: 30%;
 }
 
+.form-control-label {
+  display: inline-block;
+}
+
 @media (max-width: 500px) {
 
   #data-header {
@@ -272,6 +278,15 @@ body, html, .App, #root, .auth-wrapper {
 }
 
 @media (max-width: 1000px) {
+
+  #addButton {
+    font-size:100%;
+    font-family: Helvetica, sans-serif;
+    font-weight: 600;
+    padding-left: 8%;
+    padding-right: 8%;
+    margin-right: 3%;
+  }
 
   .home-padding {
     padding-top: 10%;
