@@ -341,7 +341,7 @@ export default class NextModal extends Component {
             // case edit save
             await axios.put('/expenses/' + expenseID, data).then(
                 res => { 
-                    this.props.updateExpenses()
+                    //this.props.updateExpenses()
                   
                 }
             ).catch(
@@ -353,9 +353,9 @@ export default class NextModal extends Component {
 
         this.props.handleClose()
 
-        if (this.props.isAdd) {
+ //       if (this.props.isAdd) {
             window.location.reload()
-        }
+   //     }
         
     }
 

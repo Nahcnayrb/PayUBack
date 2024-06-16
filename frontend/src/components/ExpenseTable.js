@@ -5,9 +5,81 @@ import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
+import DetailsModal from "./DetailsModal";
 
 
 export default class ExpenseTable extends Component {
+
+    state = {
+        show: false
+    }
+    
+    // handle details
+
+    // sort through list of expenses to find expenses relating to curr user
+    // need to know if from toPay or toBePaid
+
+    // after sort,
+    // pass in list of sorted expenses
+    // pass in labels
+    // pass in handleClickEdit, handleDelete
+
+    handleDetails = (username) => {
+
+        let [expenseIDList, targetRowsData] = this.props.getTargetRows(username, this.props.isToPay)
+
+        /**
+         *                   let dataJson = {
+                        expenseId: expenseData.id,
+                        hasSettled: borrower.hasPaid,
+                        amount: borrower.amount
+                    }} row 
+
+         */
+
+        function checkExpenseID(row) {
+            return expenseIDList.includes(row.expenseId)
+        }
+
+        let filteredRows = this.props.rows.filter(checkExpenseID)
+
+        if (!this.props.isToPay) {
+            filteredRows.forEach((row) => {
+                for (let i = 0; i < targetRowsData.length; i++) {
+                    if (targetRowsData[i].expenseId === row.expenseId) {
+                        // matched target row data with filtered row
+                        row.amount = targetRowsData[i].amount
+                        row.hasSettled = targetRowsData[i].hasSettled ? "Paid" : "Unpaid" 
+                    }
+                }
+            })
+        }
+
+        this.setState({
+            detailRows: filteredRows
+        })
+
+        console.log(filteredRows)
+
+        this.setShow(true)
+
+        let detailsHeaders = this.props.getExpenseViewHeaders(this.props.isToPay)
+
+        this.setState({
+            headers: detailsHeaders
+        })
+
+    }
+
+
+    setShow = (show) => {
+        this.setState({
+            show: show
+        })
+    }
+
+
+
 
     
 
@@ -44,15 +116,26 @@ export default class ExpenseTable extends Component {
                         <Td>{row.amount}</Td>
 
                         <Td>
-                            <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.props.handleDetails(row.username) }}>
+                            <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.handleDetails(row.username) }}>
                                 <ModeEditIcon fontSize="small"/>
-                                <label>Details</label>
+                                <label className="button-labels" >Details</label>
                             </Button>
                         </Td>
 
                     </Tr>
 
                 ))}
+                
+                <DetailsModal 
+                    rows={this.state.detailRows} 
+                    isToPay={this.props.isToPay} 
+                    show={this.state.show} 
+                    setShow={this.setShow} 
+                    headers={this.state.headers}
+                    handleClickEdit={this.props.handleClickEdit}
+                    handleDelete={this.props.handleDelete}>
+                </DetailsModal>
+                
               </Tbody>
               :
               <Tbody>
@@ -67,13 +150,13 @@ export default class ExpenseTable extends Component {
                         <Td>
                             <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.props.handleClickEdit(row.expenseId) }}>
                                 <ModeEditIcon fontSize="small"/>
-                                <label>Edit</label>
+                                <label className="button-labels">Edit</label>
                             </Button>
                         </Td>
                         <Td>
                             <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => {this.props.handleDelete(row.expenseId, row.description)}}>
                                 <DeleteIcon fontSize="small"/>
-                                <label>Delete</label>
+                                <label className="button-labels">Delete</label>
                             </Button>
                         </Td>
 

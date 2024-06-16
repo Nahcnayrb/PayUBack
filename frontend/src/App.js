@@ -69,7 +69,7 @@ setUser = user => {
 
               <Routes>
                 <Route exact path='/' element={<Home user={this.state.user}/>}/>
-                <Route exact path='/login' element={<Login setUser={this.setUser}/>}/>
+                <Route exact path='/login' element={<Login setUser={this.setUser} fetchAllUsers={this.fetchAllUsers}/>}/>
                 <Route exact path='/register' element={<Register setUser={this.setUser}/>}/>
                 <Route exact path='/dashboard' element={<Dashboard user={this.state.user} users={this.state.users}/>}></Route>
               </Routes>
