@@ -5,7 +5,7 @@
 }
 
 body {
-  background: #639dd4 !important;
+   background: #c2e9fb !important; 
   min-height:100vh;
   display:flex;
   font-weight: 400;
@@ -237,6 +237,11 @@ body, html, .App, #root, .auth-wrapper {
 }
 
 .navbar-headers {
+  cursor: pointer;
+}
+
+
+.button-labels {
   cursor: pointer;
 }
 

@@ -130,7 +130,7 @@ export default class Register extends Component {
                         {usernameError}
                         <div className='form-group'>
                             <label>Username</label>
-                            <input type='text' className="form-control" placeholder="user name" onChange={e => this.username = e.target.value}/>
+                            <input type='text' className="form-control" placeholder="username" onChange={e => this.username = e.target.value}/>
                         </div>
                         <div className="padding"></div>
                         {passwordError}

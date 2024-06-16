@@ -9,7 +9,7 @@ import Divider from '@mui/material/Divider';
 export default class Home extends Component {
 
     state = {
-        version: "Version 1.3"
+        version: "Version 1.4"
     }
 
     setShow = (show) => {
@@ -78,10 +78,7 @@ export default class Home extends Component {
                                 <h3>New Features</h3>
                             </Modal.Title>
                                 <label className='amount-label'>- Added a new "Group by users" feature on dashboard that shows a list of all the users that have yet to pay / you have yet to pay</label>
-                                <label className='amount-label'>- Added current outstanding totals for each section in Dashboard</label>
-                                <label className='amount-label'>- Updated labels on dashboard</label>
-                                <label className='amount-label'>- Synchronized all button colours to navy blue</label>
-                            
+                                <label className="amount-label">- Implemented the details popup, which shows expense details for the associated user</label>
                             <div className="dashboard-padding"></div>
                             <Modal.Title>
                                 <h3>Bug Fixes</h3>

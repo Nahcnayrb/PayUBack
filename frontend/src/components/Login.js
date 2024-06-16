@@ -24,7 +24,7 @@ export default class Login extends Component {
                     loggedIn: true
                 })
                 this.props.setUser(res.data)
-                //window.location.assign("/")
+                this.props.fetchAllUsers()
             }
         ).catch(
             err => {
@@ -62,7 +62,7 @@ export default class Login extends Component {
                         <h3>Log In</h3>
                         <div className='form-group'>
                             <label>Username</label>
-                            <input type='text' className="form-control" placeholder="user name" onChange={e => this.username = e.target.value}/>
+                            <input type='text' className="form-control" placeholder="username" onChange={e => this.username = e.target.value}/>
                         </div>
                         <div className="padding"></div>
                         <div className='form-group'>

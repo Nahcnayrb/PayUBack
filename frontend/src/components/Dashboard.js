@@ -126,7 +126,17 @@ export default class Dashboard extends Component {
 
         await axios.get(endpoint).then(
             res => {
-                isExpensesToPay ? this.setHasExpensesToPay(true) : this.setHasExpensesToBePaid(true) 
+                if (isExpensesToPay) {
+                    this.setHasExpensesToPay(true)
+                    this.setState({
+                        toPayExpenseData: res.data
+                    })
+                } else {
+                    this.setHasExpensesToBePaid(true)
+                    this.setState({
+                        toBePaidExpenseData: res.data
+                    })
+                }
 
                 res.data.forEach((expenseJson) => {
                     // for each expense object that the current user is the payer user
@@ -194,7 +204,12 @@ export default class Dashboard extends Component {
                             hasSettled = "Outstanding :("
                         }
                     } else {
-                        hasSettled = (hasSettled === true) ? "Paid :)" : "Unpaid :("
+                        // case to pay
+                        if (hasSettled) {
+                            hasSettled = "Paid :)"
+                        } else {
+                            hasSettled = "Unpaid :("
+                        }
                     }
 
                     let dataJson = {
@@ -261,9 +276,6 @@ export default class Dashboard extends Component {
                 console.log(err)
             }
         )
-
-
-
 
     }
 
@@ -360,9 +372,11 @@ export default class Dashboard extends Component {
             // case user clicked confirm on delete modal
             await axios.delete("/expenses/" + expenseId).then(
                 res => {
-                    this.updateExpenses()
+                    // this.updateExpenses()
                     this.setShowDelete(false)
                     this.setConfirmDelete(false)
+
+                    window.location.reload()
 
                     
                 },
@@ -390,8 +404,60 @@ export default class Dashboard extends Component {
         })
     }
 
-    handleDetails = (username) => {
+    getTargetRows = (username, isToPay) => {
+        // case toPay
+        // need to find all the expense rows where the given username matches the expenses' payerUsername
+        // need to use 
 
+
+        let expensesDataList = isToPay? this.state.toPayExpenseData : this.state.toBePaidExpenseData
+
+        let expenseIdList = []
+        let targetRowsData = []
+
+        expensesDataList.forEach((expenseData) => {
+
+            if ((isToPay) && (username === expenseData.payerUsername)) {
+                // case find all the toPay expenses where username == payerUsername
+                let dataJson = {
+                    expenseId: expenseData.id,
+                }
+                expenseIdList.push(expenseData.id)
+            } else {
+
+                function checkUsername(borrowerData) {
+                    return username === borrowerData.username
+                }
+
+                // case find all the tobepaid expenses where username is in the borrower list and hasn't paid
+                let borrowerDataList = expenseData.borrowerDataList
+                let filteredBorrowerDataList = borrowerDataList.filter(checkUsername)
+                
+                filteredBorrowerDataList.forEach((borrower) => {
+                    // filteredBorrowerDataList only contains the borrower that === username
+
+                    let dataJson = {
+                        expenseId: expenseData.id,
+                        hasSettled: borrower.hasPaid,
+                        amount: borrower.amount
+                    }
+                    expenseIdList.push(expenseData.id)
+                    targetRowsData.push(dataJson)
+
+                })
+
+            }
+        })
+
+
+        // console.log(expenseIdList)
+         console.log(targetRowsData)
+
+        return [expenseIdList,targetRowsData]
+    }
+
+    getExpenseViewHeaders = (isToPay) => {
+        return this.owedHeaders
     }
 
 
@@ -439,8 +505,9 @@ export default class Dashboard extends Component {
                         <FormControlLabel control={<Switch defaultChecked onChange={e => {this.handlePayExpensesToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users"/>
                         <ExpenseTable 
                             headers={this.owedHeaders}
+                            getExpenseViewHeaders={this.getExpenseViewHeaders}
                             rows={this.state.owedExpenseDataArray} 
-                            isOwed={true} 
+                            isToPay={true} 
                             handleEdit={this.handleEdit} 
                             handleDelete={this.handleDelete}
                             handleClickEdit={this.handleClickEdit}
@@ -448,7 +515,8 @@ export default class Dashboard extends Component {
                             usersViewArray={this.state.toPayUsersArray}
                             handleDetails={this.handleDetails}
                             usersEmptyMessage={"You're all paid up :)"}
-                            userViewHeaders={this.userViewHeaders}>
+                            userViewHeaders={this.userViewHeaders}
+                            getTargetRows={this.getTargetRows}>
 
                         </ExpenseTable>
                         </>
@@ -470,8 +538,9 @@ export default class Dashboard extends Component {
                         <FormControlLabel control={<Switch defaultChecked onChange={ e => {this.handleExpensesToBePaidToggle(e.target.checked)}}/>} className="form-control-label" label="Group By Users" />
                         <ExpenseTable 
                             headers={this.owingHeaders}
+                            getExpenseViewHeaders={this.getExpenseViewHeaders}
                             rows={this.state.owingExpenseDataArray} 
-                            isOwed={false} 
+                            isToPay={false} 
                             handleEdit={this.handleEdit} 
                             handleDelete={this.handleDelete}
                             handleClickEdit={this.handleClickEdit}
@@ -479,7 +548,8 @@ export default class Dashboard extends Component {
                             usersViewArray={this.state.toBePaidUsersArray}
                             handleDetails={this.handleDetails}
                             usersEmptyMessage={"All users have paid you back :)"}
-                            userViewHeaders={this.userViewHeaders}>
+                            userViewHeaders={this.userViewHeaders}
+                            getTargetRows={this.getTargetRows}>
                         </ExpenseTable>
                         </>
                         :
