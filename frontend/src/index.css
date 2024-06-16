@@ -242,6 +242,8 @@ body, html, .App, #root, .auth-wrapper {
 
 
 .button-labels {
+  padding-left: 5px;
+  margin-top: 5px;
   cursor: pointer;
 }
 
@@ -261,7 +263,9 @@ body, html, .App, #root, .auth-wrapper {
   display: inline-block;
 }
 
-@media (max-width: 500px) {
+
+
+@media (max-width: 700px) {
 
   #data-header {
     font-size: 16px;
@@ -282,7 +286,13 @@ body, html, .App, #root, .auth-wrapper {
 
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
+
+  .button-labels {
+    padding-left: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
 
   #addButton {
     font-size:100%;

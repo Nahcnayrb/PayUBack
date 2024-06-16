@@ -352,6 +352,7 @@ export default class AddModal extends Component {
 
 
         if (this.state.showNext) {
+            console.log(this.props.isInDetails)
 
             return (
                 <NextModal 
@@ -373,6 +374,8 @@ export default class AddModal extends Component {
                     originalTotal={this.state.fetchedTotal}
                     editMadeChanges={this.state.editMadeChanges}
                     updateExpenses={this.props.updateExpenses}
+                    isInDetails={this.props.isInDetails}
+                    setInDetails={this.props.setInDetails}
                  ></NextModal>
             )
 
@@ -427,7 +430,6 @@ export default class AddModal extends Component {
                                     name="payer-user-select"
                                     options={secondOptions}
                                     className="basic-multi-select"
-                                    classNamePrefix="select"
                                     closeMenuOnSelect={true}
                                     placeholder='Select the expense payer'
                                     value={this.state.payerUser}
@@ -442,7 +444,6 @@ export default class AddModal extends Component {
                                     name="involved-user-select"
                                     options={firstOptions}
                                     className="basic-multi-select"
-                                    classNamePrefix="select"
                                     closeMenuOnSelect={false}
                                     blurInputOnSelect={false}
                                     placeholder='select the people included in the expense'

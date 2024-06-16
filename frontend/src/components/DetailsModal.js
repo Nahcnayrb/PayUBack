@@ -11,6 +11,7 @@ export default class DetailsModal extends Component {
         this.props.setShow(false)
     }
 
+
     render() {
         return (
             <Modal
@@ -23,18 +24,22 @@ export default class DetailsModal extends Component {
 
                 <Modal.Header className='modal-header'closeButton>
                 <Modal.Title >
-                    <h3>DETAILS</h3>
+                    <h3>{this.props.title}</h3>
                 </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <label className='amount-label'>Details Modal</label>
                     <ExpenseTable 
+                        isToPay={this.props.isToPay}
                         headers={this.props.headers}
                         rows={this.props.rows} 
                         handleEdit={this.props.handleEdit} 
                         handleDelete={this.props.handleDelete}
                         handleClickEdit={this.props.handleClickEdit}
-                        toggleIsOn={false}>
+                        toggleIsOn={false}
+                        payButtonArray={this.props.payButtonArray}
+                        setPayButton={this.props.setPayButton}
+                        currentUsername={this.props.currentUsername}
+                        isInDetails={true}>
                     </ExpenseTable>
                 </Modal.Body>
                 <div className='modal-padding'></div>

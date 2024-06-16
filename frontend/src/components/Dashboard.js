@@ -3,9 +3,11 @@ import AddModal from './AddModal';
 import axios from 'axios';
 import ExpenseTable from './ExpenseTable';
 import DeleteModal from './DeleteModal';
+import PayAllModal from './PayAllModal';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
+import { toHaveDisplayValue } from '@testing-library/jest-dom/matchers';
 
 export default class Dashboard extends Component {
 
@@ -17,7 +19,8 @@ export default class Dashboard extends Component {
         toBePaidUsersArray:[],
         expensesToBePaidToggle: true,
         payExpensesToggle: true,
-        users: this.props.users
+        users: this.props.users,
+        modalOpenedInDetails: false
     };
 
             // in the group by users view for to pay:
@@ -122,7 +125,10 @@ export default class Dashboard extends Component {
 
         let usersViewArray = []
 
+        let payButtonArray = []
+
         let currTotal = 0
+
 
         await axios.get(endpoint).then(
             res => {
@@ -206,8 +212,10 @@ export default class Dashboard extends Component {
                     } else {
                         // case to pay
                         if (hasSettled) {
+                            payButtonArray.push(true)
                             hasSettled = "Paid :)"
                         } else {
+                            payButtonArray.push(false)
                             hasSettled = "Unpaid :("
                         }
                     }
@@ -217,7 +225,8 @@ export default class Dashboard extends Component {
                         date: date,
                         description: description,
                         amount: amount,
-                        expenseId: expenseId
+                        expenseId: expenseId,
+                        payerUsername
                     }
 
                     expenseDataArray.push(dataJson)
@@ -245,6 +254,9 @@ export default class Dashboard extends Component {
 
                 if (isExpensesToPay) {
                     this.setOwedExpenses(expenseDataArray)
+                    this.setState({
+                        payButtonArray: payButtonArray
+                    })
                     this.setToPayUsersArray(usersViewArray)
                     this.setState({
                         toPayTotal: currTotal
@@ -321,12 +333,16 @@ export default class Dashboard extends Component {
     }
 
 
-    handleClickEdit = async (expenseId) => {
+    handleClickEdit = async (expenseId,isInDetails) => {
 
         // case edit button was clicked on an expense
         // set show expense = true
+        console.log(isInDetails)
 
         // get expense data
+        this.setState({
+            modalOpenedInDetails: isInDetails
+        })
 
 
         await axios.get("/expenses/" + expenseId).then(
@@ -352,9 +368,21 @@ export default class Dashboard extends Component {
         })
     }
 
+    setShowPayAll = (show) => {
+        this.setState({
+            showPayAll: show
+        })
+    }
+
     setConfirmDelete = (confirm) => {
         this.setState({
             confirmDelete: confirm
+        })
+    }
+
+    setConfirmPayAll = (confirm) => {
+        this.setState({
+            confirmPayAll: confirm
         })
     }
 
@@ -376,7 +404,12 @@ export default class Dashboard extends Component {
                     this.setShowDelete(false)
                     this.setConfirmDelete(false)
 
-                    window.location.reload()
+                    if (this.state.modalOpenedInDetails) {
+                        this.setIsInDetails(false)
+                        window.location.reload()
+                    } else {
+                        this.updateExpenses()
+                    }
 
                     
                 },
@@ -388,6 +421,36 @@ export default class Dashboard extends Component {
         } else {
             // confirm delete not yet clicked, this means modal is not open
             this.setShowDelete(true)
+        }
+
+    }
+
+    handlePayAll = async (payerUsername, borrowerUsername) => {
+
+
+        let label = this.getLabel(payerUsername)
+        this.setState({
+            payAllLabel:label,
+            payAllUser: payerUsername
+        })
+
+        if (this.state.confirmPayAll) {
+            // case user clicked confirm on delete modal
+            await axios.put("/expenses/payAll/" + payerUsername + "/" + borrowerUsername).then(
+                res => {
+                    this.updateExpenses()
+                    this.setShowPayAll(false)
+                    this.setConfirmPayAll(false)
+                    
+                },
+                err => {
+                    console.log(err)
+                    
+                }
+            )
+        } else {
+            // confirm Pay All not yet clicked, this means modal is not open
+            this.setShowPayAll(true)
         }
 
     }
@@ -460,6 +523,21 @@ export default class Dashboard extends Component {
         return this.owedHeaders
     }
 
+    setPayButton = (isDisabled,i) => {
+        let payButtonArray = this.state.payButtonArray
+        payButtonArray[i] = isDisabled
+        this.setState({
+            payButtonArray: payButtonArray
+        })
+
+    }
+
+    setIsInDetails = (isInDetails) => {
+        this.setState({
+            modalOpenedInDetails: isInDetails
+        })
+    }
+
 
 
     render() {
@@ -470,6 +548,7 @@ export default class Dashboard extends Component {
             // case not logged in
             return (
                 <>
+                    <div className='dashboard-padding'/>
                     <div className='dashboard-container'></div>
                 </>
             )
@@ -516,7 +595,13 @@ export default class Dashboard extends Component {
                             handleDetails={this.handleDetails}
                             usersEmptyMessage={"You're all paid up :)"}
                             userViewHeaders={this.userViewHeaders}
-                            getTargetRows={this.getTargetRows}>
+                            getTargetRows={this.getTargetRows}
+                            payButtonArray={this.state.payButtonArray}
+                            setPayButton={this.setPayButton}
+                            updateExpenses={this.updateExpenses}
+                            currentUsername={this.props.user.username}
+                            isInDetails={false}
+                            handlePayAll={this.handlePayAll}>
 
                         </ExpenseTable>
                         </>
@@ -549,7 +634,9 @@ export default class Dashboard extends Component {
                             handleDetails={this.handleDetails}
                             usersEmptyMessage={"All users have paid you back :)"}
                             userViewHeaders={this.userViewHeaders}
-                            getTargetRows={this.getTargetRows}>
+                            getTargetRows={this.getTargetRows}
+                            isInDetails={false}
+                            handlePayAll={this.handlePayAll}>
                         </ExpenseTable>
                         </>
                         :
@@ -565,7 +652,9 @@ export default class Dashboard extends Component {
                 show={this.state.showEdit} 
                 setShow={this.setShowEdit} 
                 currentUser={this.props.user}
-                updateExpenses={this.updateExpenses}/>
+                updateExpenses={this.updateExpenses}
+                isInDetails={this.state.modalOpenedInDetails}
+                setInDetails={this.setIsInDetails}/>
             <DeleteModal 
                 show={this.state.showDelete} 
                 setShow={this.setShowDelete} 
@@ -574,6 +663,15 @@ export default class Dashboard extends Component {
                 description={this.state.deleteDescription} 
                 expenseId={this.state.deleteExpenseId}
                 updateExpenses={this.updateExpenses}/>
+            <PayAllModal
+                show={this.state.showPayAll}
+                setShow={this.setShowPayAll}
+                payerUser={this.state.payAllUser}
+                label={this.state.payAllLabel}
+                currentUser={this.props.user.username}
+                handlePayAll={this.handlePayAll}
+                updateExpenses={this.updateExpenses}
+                setPayAllConfirmation={this.setConfirmPayAll}/>
             </div>
             <div className='dashboard-padding' />
             </>
