@@ -12,6 +12,12 @@ export default class DetailsModal extends Component {
     }
 
 
+    handleDelete = (expenseId, description) => {
+
+        this.props.setIsInDetails(true)
+        this.props.handleDelete(expenseId, description, true)
+
+    }
     render() {
         return (
             <Modal
@@ -33,13 +39,14 @@ export default class DetailsModal extends Component {
                         headers={this.props.headers}
                         rows={this.props.rows} 
                         handleEdit={this.props.handleEdit} 
-                        handleDelete={this.props.handleDelete}
+                        handleDelete={this.handleDelete}
                         handleClickEdit={this.props.handleClickEdit}
                         toggleIsOn={false}
                         payButtonArray={this.props.payButtonArray}
                         setPayButton={this.props.setPayButton}
                         currentUsername={this.props.currentUsername}
-                        isInDetails={true}>
+                        isInDetails={true}
+                        setIsInDetails={this.props.setIsInDetails}>
                     </ExpenseTable>
                 </Modal.Body>
                 <div className='modal-padding'></div>
