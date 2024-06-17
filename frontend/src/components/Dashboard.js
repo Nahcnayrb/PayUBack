@@ -337,7 +337,6 @@ export default class Dashboard extends Component {
 
         // case edit button was clicked on an expense
         // set show expense = true
-        console.log(isInDetails)
 
         // get expense data
         this.setState({
@@ -386,15 +385,13 @@ export default class Dashboard extends Component {
         })
     }
 
-    handleDelete = async (expenseId, description) => {
+    handleDelete = async (expenseId, description, isInDetails) => {
 
         
         this.setState({
             deleteDescription: description,
             deleteExpenseId: expenseId
         })
-
-
 
         if (this.state.confirmDelete) {
             // case user clicked confirm on delete modal
@@ -403,8 +400,8 @@ export default class Dashboard extends Component {
                     // this.updateExpenses()
                     this.setShowDelete(false)
                     this.setConfirmDelete(false)
+                    if (isInDetails) {
 
-                    if (this.state.modalOpenedInDetails) {
                         this.setIsInDetails(false)
                         window.location.reload()
                     } else {
@@ -513,8 +510,6 @@ export default class Dashboard extends Component {
         })
 
 
-        // console.log(expenseIdList)
-         console.log(targetRowsData)
 
         return [expenseIdList,targetRowsData]
     }
@@ -601,7 +596,8 @@ export default class Dashboard extends Component {
                             updateExpenses={this.updateExpenses}
                             currentUsername={this.props.user.username}
                             isInDetails={false}
-                            handlePayAll={this.handlePayAll}>
+                            handlePayAll={this.handlePayAll}
+                            setIsInDetails={this.setIsInDetails}>
 
                         </ExpenseTable>
                         </>
@@ -636,7 +632,8 @@ export default class Dashboard extends Component {
                             userViewHeaders={this.userViewHeaders}
                             getTargetRows={this.getTargetRows}
                             isInDetails={false}
-                            handlePayAll={this.handlePayAll}>
+                            handlePayAll={this.handlePayAll}
+                            setIsInDetails={this.setIsInDetails}>
                         </ExpenseTable>
                         </>
                         :
@@ -660,6 +657,7 @@ export default class Dashboard extends Component {
                 setShow={this.setShowDelete} 
                 setConfirmDelete={this.setConfirmDelete}
                 handleDelete={this.handleDelete}
+                isInDetails={this.state.modalOpenedInDetails}
                 description={this.state.deleteDescription} 
                 expenseId={this.state.deleteExpenseId}
                 updateExpenses={this.updateExpenses}/>

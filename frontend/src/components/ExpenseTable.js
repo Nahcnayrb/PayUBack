@@ -192,7 +192,8 @@ export default class ExpenseTable extends Component {
                     handleDelete={this.props.handleDelete}
                     payButtonArray={this.state.payButtonArray}
                     setPayButton={this.setPayButton}
-                    currentUsername={this.props.currentUsername}>
+                    currentUsername={this.props.currentUsername}
+                    setIsInDetails={this.props.setIsInDetails}>
                 </DetailsModal>
                 
               </Tbody>

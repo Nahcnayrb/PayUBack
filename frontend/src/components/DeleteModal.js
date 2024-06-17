@@ -18,7 +18,7 @@ export default class DeleteModal extends Component {
         })
         this.props.setConfirmDelete(true)
         setTimeout(() => {
-            this.props.handleDelete(this.props.expenseId, this.props.description)
+            this.props.handleDelete(this.props.expenseId, this.props.description, this.props.isInDetails)
         }, 200)
     }
 
