@@ -1,7 +1,7 @@
 {
     "responseOverrides": {
         "404": {
-            "rewrite": "/PayUBack",
+            "rewrite": "/",
             "statusCode": 200
         }
     }
