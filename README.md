@@ -13,8 +13,8 @@ Back-End Server (files located in /PayUBack):
 - Java 17
 - Spring Boot 3.2.5
 - Maven
-- CosmosDB NoSQL database
+- Azure CosmosDB NoSQL database
 
-- Application Deployment & CI/CD platform:
+Application Deployment & CI/CD platform:
   - Microsoft Azure
 
