@@ -1,6 +1,6 @@
 PayUBack is a full-stack web application that allows users to split and track shared expenses with along users. 
 
-The UI is currently hosted at https://nahcnayrb.github.io/PayUBack/. To begin creating & tracking expenses, an account must first be created :) 
+The UI is currently hosted at https://nahcnayrb.github.io/PayUBack/. To begin creating & tracking expenses, click on the url and create a new account :)
 
 Technologies used:
 
