@@ -1,10 +1,12 @@
 package com.bryanchan.PayUBack.controller;
 
 import com.azure.core.annotation.Get;
+import com.bryanchan.PayUBack.model.BorrowerData;
 import com.bryanchan.PayUBack.model.Expense;
 import com.bryanchan.PayUBack.model.User;
 import com.bryanchan.PayUBack.repository.ExpenseRepository;
 import com.bryanchan.PayUBack.repository.UserRepository;
+import com.bryanchan.PayUBack.service.ExpenseService;
 import com.bryanchan.PayUBack.utils.ValueGenerator;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,67 @@ public class ExpenseController {
             return new ResponseEntity("Expense updated", HttpStatus.OK);
         }
         return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+    }
+
+
+    @PutMapping("/pay/{expenseId}/{username}")
+    public ResponseEntity<String> markExpenseAsPaidForGivenUser(@PathVariable String expenseId, @PathVariable String username) {
+
+        Optional<Expense> fetchedExpense = expenseRepository.findById(expenseId);
+        if (fetchedExpense.isPresent()) {
+
+            Expense e = fetchedExpense.get();
+            for (BorrowerData b : e.getBorrowerDataList()) {
+                if (b.getUsername().equals(username)) {
+                    expenseRepository.delete(e);
+                    b.setHasPaid(true);
+                    expenseRepository.save(e);
+                    break;
+                }
+            }
+
+            return new ResponseEntity("Expense updated", HttpStatus.OK);
+
+        } else {
+            return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+        }
+
+    }
+
+    @PutMapping("/payAll/{payerUsername}/{borrowerUsername}")
+    public ResponseEntity markAllAsPaid(@PathVariable String payerUsername, @PathVariable String borrowerUsername) {
+        List<Expense> expenses = expenseRepository.findExpensesByPayerUsername(payerUsername);
+        for (Expense e : expenses) {
+            for (BorrowerData b : e.getBorrowerDataList()) {
+                if (b.getUsername().equals(borrowerUsername) && (!b.isHasPaid())) {
+                    // found borrower in current expense
+                    // can safely remove old expense
+                    expenseRepository.delete(e);
+                    b.setHasPaid(true);
+                    expenseRepository.save(e);
+                }
+            }
+        }
+        return new ResponseEntity("Expense updated", HttpStatus.OK);
+    }
+
+    @PutMapping("/payAllGroups/{groupId}/{payerUsername}/{borrowerUsername}")
+    public ResponseEntity markAllAsPaidInCurrGroup(@PathVariable String groupId,
+                                                   @PathVariable String payerUsername,
+                                                   @PathVariable String borrowerUsername) {
+        List<Expense> expenses = expenseRepository.findCurrGroupExpensesByPayerUsername(groupId,payerUsername);
+        for (Expense e : expenses) {
+            for (BorrowerData b : e.getBorrowerDataList()) {
+                if (b.getUsername().equals(borrowerUsername) && (!b.isHasPaid())) {
+                    // found borrower in current expense
+                    // can safely remove old expense
+                    expenseRepository.delete(e);
+                    b.setHasPaid(true);
+                    expenseRepository.save(e);
+                }
+            }
+        }
+        return new ResponseEntity("Expense updated", HttpStatus.OK);
     }
 
 

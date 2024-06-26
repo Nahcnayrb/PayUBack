@@ -18,6 +18,12 @@ public interface ExpenseRepository extends CosmosRepository<Expense, String> {
     @Query(value="SELECT * FROM e where e.payerUsername=@username")
     List<Expense> findExpensesByPayerUsername(@Param("username") String username);
 
+    @Query(value="SELECT * FROM e where e.payerUsername=@username AND e.groupId=@groupId")
+    List<Expense> findCurrGroupExpensesByPayerUsername(@Param("groupId") String groupId, @Param("username") String username);
+
+    @Query(value="SELECT * FROM e where e.groupId=@groupId")
+    List<Expense> findExpensesByGroupId(@Param("groupId") String groupId);
+
 
 
 

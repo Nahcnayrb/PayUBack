@@ -13,7 +13,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Container(containerName = "Expense", ru = "400")
+@Container(containerName = "Expense", ru = "100")
 public class Expense {
 
 
@@ -30,14 +30,16 @@ public class Expense {
     private double amount;
     private String description;
     private String date;
+    private String groupId;
 
-    public Expense(String payerUsername, List<BorrowerData> borrowerDataList, double amount, String description, String date) {
+    public Expense(String payerUsername, List<BorrowerData> borrowerDataList, double amount, String description, String date, String groupId) {
         this.id = ValueGenerator.generateNewValue();
         this.payerUsername = payerUsername;
         this.borrowerDataList = borrowerDataList;
         this.amount = amount;
         this.description = description;
         this.date = date;
+        this.groupId = groupId;
 
 
     }
