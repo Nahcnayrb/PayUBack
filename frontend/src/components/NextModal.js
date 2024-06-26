@@ -318,7 +318,8 @@ export default class NextModal extends Component {
             borrowerDataList : borrowerDataArray,
             amount: this.props.amount,
             date: this.props.date,
-            description: this.props.description
+            description: this.props.description,
+            groupId: this.props.selectedGroup.value
         }
 
 
@@ -500,6 +501,8 @@ export default class NextModal extends Component {
             </Button>
             {this.isAdd? <Button variant="primary" onClick={this.handleCreate}>Create</Button> : <Button variant="primary" onClick={this.handleCreate}>Save</Button>}
             </Modal.Footer>
+            <div className='modal-padding'></div>
+            <div className='modal-padding'></div>
             <div className='modal-padding'></div>
         </Modal>
     )}

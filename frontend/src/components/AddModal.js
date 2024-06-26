@@ -6,11 +6,19 @@ import Select from 'react-select'
 import NextModal from './NextModal';
 
 export default class AddModal extends Component {
-
     
     state = {
-        hasLoadedData:false
+        hasLoadedData:false,
+        selectOptions:[],
+        selectedGroup:{value:"individual", label:"No Group"},
+        groupOptions:[],
+        hasLoadedGroups: false
     }
+
+    constructor(props) {
+        super()
+    }
+
 
     resetDate = () => {
 
@@ -36,7 +44,6 @@ export default class AddModal extends Component {
         let invalidInvolvedUsersMessage=""
         let invalidAmountMessage=""
         let payerUsername = ""
-
 
         if (this.state.payerUser === "") {
             invalidPayerUserMessage = "A payer must be selected"
@@ -67,7 +74,7 @@ export default class AddModal extends Component {
 
 
 
-        if (invalidAmountMessage.length !== 0 ||invalidInvolvedUsersMessage.length !== 0 || invalidAmountMessage.length !== 0 ) {
+        if (invalidAmountMessage.length !== 0 ||invalidInvolvedUsersMessage.length !== 0 || invalidPayerUserMessage.length !== 0 ) {
             return
         }
 
@@ -185,30 +192,61 @@ export default class AddModal extends Component {
         })
     }
 
-    createOption = (userJson) => {
+    createOption = (value, isUser) => {
 
         let option = {}
 
-        let label = this.getLabel(userJson.username)
+        if (isUser) {
+            let label = this.getLabel(value)
 
-        option = {
-            value: userJson.username,
-            label: label
+            option = {
+                value: value,
+                label: label
+            }
+        } else {
+            // case group option
+            let label = this.getGroupLabel(value)
+            option = {
+                value: value,
+                label: label
+            }
+
         }
 
         return option
 
     }
 
-    loadData = () => {
+    getGroupLabel = (groupId) => {
+        let label = "No Group"
+        if (this.props.groupsData != null) {
+            for (let i = 0; i < this.props.groupsData.length; i++) {
+                let currGroup = this.props.groupsData[i]
+                if (currGroup.id === groupId) {
+                    // found group
+                    label = currGroup.groupName + " (ID: " + currGroup.id.substring(0,10) + "....)"
+                    return label
+                }
+            }
+        }
+        return label
 
+    }
+
+    loadData = () => {
+        console.log("load data lol")
 
         if (!this.props.editExpenseData || this.state.isLoaded) {
             // case editexpense data is empty or null
             // we would be in here if adding data
+
+            if (!this.state.isLoaded) {
+                this.updateSelectOptions({value:"individual", label:"No Group"})
+            }
             return
         }
 
+        // TODO: for the edit case, need to load groups selection & update selection options as well
         let expenseJson = this.props.editExpenseData
 
         let payerUsername = expenseJson.payerUsername
@@ -216,12 +254,23 @@ export default class AddModal extends Component {
         let date = expenseJson.date
         let amount = expenseJson.amount
         let allUsers = this.props.users
+        let groupId = expenseJson.groupId
+    
 
         this.setState({
             fetchedTotal: amount
         })
      
         let involvedUsersOptions = []
+
+        let groupLabel = this.getGroupLabel(groupId)
+
+        let groupOption = {
+            value: groupId,
+            label: groupLabel
+        }
+
+        this.updateSelectOptions(groupOption)
 
         let payerLabel = this.getLabel(payerUsername)
 
@@ -236,7 +285,7 @@ export default class AddModal extends Component {
          allUsers.forEach((user) => {
 
              if (user.username === borrowerData.username) {
-                 involvedUsersOptions.push(this.createOption(user))
+                 involvedUsersOptions.push(this.createOption(user.username, true))
              }
          })
 
@@ -249,7 +298,9 @@ export default class AddModal extends Component {
              involvedUsers: involvedUsersOptions,
              payerUser: payerUserOption,
              date: date,
-             amount: amount
+             amount: amount,
+             selectedGroup: groupOption
+             
          })
 
     }
@@ -287,11 +338,69 @@ export default class AddModal extends Component {
         
     }
 
+    updateSelectOptions = (groupSelection) => {
+        console.log("updating select options")
+        // sort through the list of ALL selections
+        // find the ones that matches the username list of group selections
+        // return those selections to each 
+        let optionsArray = []
+        let usersArray =this.props.users
+        let groupUsernames = []
+
+        if (groupSelection.value === "individual") {
+            // case no group selected
+            // selections array == all users
+    
+            if (usersArray != null) {
+            usersArray.forEach((userJson) => {
+                let option = this.createOption(userJson.username, true)
+                optionsArray.push(option)
+            })}
+
+            this.setState({
+                involvedUsers: []
+            })
+
+        } else {
+
+            for (let i = 0; i < this.props.groupsData.length; i++) {
+                let currGroup = this.props.groupsData[i]
+                if (currGroup.id === groupSelection.value) {
+                    groupUsernames = currGroup.usernames
+                }
+            }
+
+
+
+            function checkUsername(user) {
+                return groupUsernames.includes(user.username)
+            }
+    
+            let filteredUsers = usersArray.filter(checkUsername)
+
+            filteredUsers.forEach((userJson) => {
+                let option = this.createOption(userJson.username, true)
+                optionsArray.push(option)
+            })
+            this.setState({
+                payerUser: "",
+                involvedUsers: optionsArray
+            })
+
+        }
+
+        this.setState({
+            selectOptions: optionsArray,
+            selectedGroup: groupSelection
+        })
+
+
+    }
+
     
 
 
     render() {
-
 
         if (!this.props.currentUser) {
             // case not logged in
@@ -303,19 +412,16 @@ export default class AddModal extends Component {
             )
         }
 
-        let usersArray =this.props.users
 
-        let optionsArray = []
+        let groupOptions = [{value:"individual", label:"No Group"}]
 
-        if (usersArray != null) {
-        usersArray.forEach((userJson) => {
-            let option = this.createOption(userJson)
-            optionsArray.push(option)
-        })}
-
-        let firstOptions = optionsArray
-
-        let secondOptions = optionsArray
+        if (this.props.groupsData) {
+            this.props.groupsData.forEach((group) => {
+                let option = this.createOption(group.id, false)
+                groupOptions.push(option)
+                
+            })
+        }
 
         let invalidInvolvedUsersError = ""
 
@@ -376,6 +482,7 @@ export default class AddModal extends Component {
                     updateExpenses={this.props.updateExpenses}
                     isInDetails={this.props.isInDetails}
                     setInDetails={this.props.setInDetails}
+                    selectedGroup={this.state.selectedGroup}
                  ></NextModal>
             )
 
@@ -398,6 +505,20 @@ export default class AddModal extends Component {
                         </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
+                                
+                                <label className='amount-label'>Associated group</label>
+                                <Select
+                                name="payer-user-select"
+                                // defaultValue={{value:"No group", label:"No Group"}}
+                                options={groupOptions}
+                                className="basic-multi-select"
+                                closeMenuOnSelect={true}
+                                value={this.state.selectedGroup}
+                                placeholder='Select a group'
+                                onChange={(choice) => {this.updateSelectOptions(choice)}}
+                                />
+                                <div className="padding"></div>
+
                                 <label className='amount-label'>When did the expense occur?</label>
                                 <input 
                                     aria-label="Date" 
@@ -428,7 +549,7 @@ export default class AddModal extends Component {
                                 <Select
 
                                     name="payer-user-select"
-                                    options={secondOptions}
+                                    options={this.state.selectOptions}
                                     className="basic-multi-select"
                                     closeMenuOnSelect={true}
                                     placeholder='Select the expense payer'
@@ -442,7 +563,7 @@ export default class AddModal extends Component {
 
                                     isMulti='true'
                                     name="involved-user-select"
-                                    options={firstOptions}
+                                    options={this.state.selectOptions}
                                     className="basic-multi-select"
                                     closeMenuOnSelect={false}
                                     blurInputOnSelect={false}
@@ -473,6 +594,8 @@ export default class AddModal extends Component {
                         </Button>
                         <Button variant="primary" onClick={this.handleNext}>Next</Button>
                         </Modal.Footer>
+                        <div className='modal-padding'></div>
+                        <div className='modal-padding'></div>
                         <div className='modal-padding'></div>
                 </Modal>
     )}}

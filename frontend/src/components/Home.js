@@ -5,11 +5,13 @@ import { Link } from "react-router-dom"
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import Divider from '@mui/material/Divider';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
 
 export default class Home extends Component {
 
     state = {
-        version: "Version 1.5"
+        version: "Version 1.6"
     }
 
     setShow = (show) => {
@@ -77,14 +79,12 @@ export default class Home extends Component {
                             <Modal.Title>
                                 <h3>New Features</h3>
                             </Modal.Title>
-                                <label className='amount-label'>- Added a new "Group by users" feature on dashboard that shows a list of all the users that have yet to pay / you have yet to pay</label>
-                                <label className="amount-label">- Implemented the details popup, which shows expense details for the associated user</label>
-                                <label className="amount-label">- Implemented the "Pay" feature, which acts as a shortcut to mark the associated expense as "Paid"</label>
-                                <label className="amount-label">- Implemented the "Pay All" feature, which acts as a shortcut to mark ALL expenses associated with the target user as "Paid"</label>
+                                <label className='amount-label'>- Implemented the new 'Groups' feature from scratch, which categorizes expenses into groups for user convenience</label>
                                 
                             <div className="dashboard-padding"></div>
                             <Modal.Title>
                                 <h3>Bug Fixes</h3>
+                                <label className='amount-label'>- Fixed an issue where add group modal / join group modal contents were not cleared after closing/cancelling</label>
                             </Modal.Title>
 
                         </Modal.Body>
@@ -99,8 +99,11 @@ export default class Home extends Component {
                         <div className="home-padding"/>
                         <Divider  sx={{ borderBottomWidth: 5 }}/>  
 
-                        <label id='footnote-label'>Made with <FavoriteIcon fontSize="small"/> by <Link to={'https://www.linkedin.com/in/nahcnayrb/'} target="_blank" rel="noopener noreferrer">Bryan Chan</Link></label>
-                    
+                        <label id='footnote-label'>Made with <FavoriteIcon style={{color: '#ed933e'}} fontSize="small"/> by Bryan Chan</label>
+                        <div className="icon-div">
+                            <label id='icon-label'> <Link style={{color: "black"}} to={'https://github.com/Nahcnayrb/PayUBack'} target="_blank" rel="noopener noreferrer"><GitHubIcon fontSize="large"/></Link></label>
+                            <label id='icon-label'> <Link style={{color: "#0077B5"}} to={'https://www.linkedin.com/in/nahcnayrb/'} target="_blank" rel="noopener noreferrer"><LinkedInIcon fontSize="large"/></Link></label>
+                        </div>
                         </div>
                 </div>
                 </>

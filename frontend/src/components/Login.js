@@ -24,13 +24,11 @@ export default class Login extends Component {
                     loggedIn: true
                 })
                 this.props.setUser(res.data)
-                this.props.fetchAllUsers()
+                //this.props.fetchAllUsers()
+                setTimeout(()=>{window.location.reload()},10)
             }
         ).catch(
             err => {
-                this.setState({
-                    message: err.response.data.message
-                })
                 if (err.response.status === 401) {
                     this.setState({
                         message: "username or password is incorrect."

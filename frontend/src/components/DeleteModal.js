@@ -18,12 +18,15 @@ export default class DeleteModal extends Component {
         })
         this.props.setConfirmDelete(true)
         setTimeout(() => {
-            this.props.handleDelete(this.props.expenseId, this.props.description, this.props.isInDetails)
+            this.props.handleDelete(this.props.id, this.props.description, this.props.isInDetails)
         }, 200)
     }
 
 
     render() {
+        if (!this.props.description) {
+            return (<></>)
+        }
 
         return (
                 <Modal
@@ -42,8 +45,7 @@ export default class DeleteModal extends Component {
                         </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                                <label className='amount-label'>Are you sure you want to delete the Expense:"{this.props.description}"?
-                                     This will delete the expense for everyone involved</label>
+                                <label className='amount-label'>{this.props.description}</label>
                         </Modal.Body>
                         <div className='modal-padding'></div>
                         <Modal.Footer>
