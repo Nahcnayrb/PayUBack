@@ -10,6 +10,7 @@ Technologies used:
 - Front-End UI (files located in /frontend): 
   - JavaScript
   - React.js
+  - Node.js
   - Material UI Core library
 
 - Back-End Server (files located in /PayUBack):
