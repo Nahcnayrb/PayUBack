@@ -16,12 +16,14 @@ public class Group {
     private String groupName;
     private List<String> usernames;
     private String colourHexCode;
+    private String creatorUsername;
 
-    public Group(String groupName, List<String> usernames, String colourHexCode) {
+    public Group(String groupName, List<String> usernames, String colourHexCode, String creatorUsername) {
         this.id = ValueGenerator.generateNewValue();
         this.groupName = groupName;
         this.usernames = usernames;
         this.colourHexCode = colourHexCode;
+        this.creatorUsername = creatorUsername;
     }
 
 

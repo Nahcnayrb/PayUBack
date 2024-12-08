@@ -59,6 +59,17 @@
 			<version>1.9.3</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-storage-blob</artifactId>
+			<version>12.26.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mailjet</groupId>
+			<artifactId>mailjet-client</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+
 
 	</dependencies>
 

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Id;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -31,8 +32,10 @@ public class Expense {
     private String description;
     private String date;
     private String groupId;
+    private String receiptFileType;
 
-    public Expense(String payerUsername, List<BorrowerData> borrowerDataList, double amount, String description, String date, String groupId) {
+    public Expense(String payerUsername, List<BorrowerData> borrowerDataList, double amount, String description, String date, String groupId, String receiptFileType) {
+
         this.id = ValueGenerator.generateNewValue();
         this.payerUsername = payerUsername;
         this.borrowerDataList = borrowerDataList;
@@ -40,6 +43,7 @@ public class Expense {
         this.description = description;
         this.date = date;
         this.groupId = groupId;
+        this.receiptFileType = receiptFileType;
 
 
     }

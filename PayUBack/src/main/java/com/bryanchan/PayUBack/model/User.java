@@ -31,6 +31,7 @@ public class User {
     private String password;
     private String token;
     private String email;
+    private String resetPasswordKey;
 
     public User(String firstName, String lastName, String username, String password, String email) {
         this.id = ValueGenerator.generateNewValue();

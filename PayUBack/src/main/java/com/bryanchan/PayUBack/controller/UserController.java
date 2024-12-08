@@ -1,5 +1,7 @@
 package com.bryanchan.PayUBack.controller;
 
+import com.azure.core.annotation.Get;
+import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.PartitionKey;
 import com.bryanchan.PayUBack.model.User;
 import com.bryanchan.PayUBack.repository.UserRepository;
@@ -102,4 +104,49 @@ public class UserController {
         }
         return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("/forgotPassword")
+    public ResponseEntity forgotPassword(@RequestBody Map<String, String> request) {
+        // request should have two keys, username & email
+        try {
+            String username = request.get("username");
+            String email = request.get("email");
+            userService.forgotPassword(username, email);
+            return new ResponseEntity<String>("", HttpStatus.OK);
+        } catch (NotFoundException e) {
+            // case data did not match an existing user
+            return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("", HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @PutMapping("/resetPassword")
+    public ResponseEntity resetPassword(@RequestBody Map<String, String> request) {
+        // request should have two keys, resetPasswordKey & password
+        try {
+            String resetPasswordKey = request.get("resetPasswordKey");
+            String password = request.get("password");
+
+            userService.resetPassword(resetPasswordKey, password);
+            return new ResponseEntity<String>("", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("", HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @GetMapping("/validate/{resetPasswordKey}")
+    public ResponseEntity checkResetPasswordKeyIsValid(@PathVariable String resetPasswordKey) {
+        List<User> users = userRepository.findUserByResetPasswordKey(resetPasswordKey);
+        if (users.size() == 0) {
+            return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<String>("", HttpStatus.OK);
+        }
+
+    }
+
+
 }
