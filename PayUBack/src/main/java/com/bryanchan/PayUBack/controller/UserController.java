@@ -1,9 +1,12 @@
 package com.bryanchan.PayUBack.controller;
 
+import com.azure.core.annotation.Get;
+import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.PartitionKey;
 import com.bryanchan.PayUBack.model.User;
 import com.bryanchan.PayUBack.repository.UserRepository;
 
+import com.bryanchan.PayUBack.service.UserService;
 import com.bryanchan.PayUBack.utils.ValueGenerator;
 import org.apache.coyote.Response;
 import org.jasypt.util.password.StrongPasswordEncryptor;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -23,23 +27,22 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/add")
     public ResponseEntity<String> add(@RequestBody User user) {
 
-        List<User> users = userRepository.findUserByUsername(user.getUsername());
-        if (users.isEmpty()) {
-            // every created user is guaranteed to have a token
-            String token = ValueGenerator.generateNewValue();
-            user.setToken(token);
-            String plainPassword = user.getPassword();
-            StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
-            user.setPassword(encryptor.encryptPassword(plainPassword));
-            userRepository.save(user);
+        User u = userService.addUser(user,false);
+
+        if (u != null) {
+            // case user created successfully
             return new ResponseEntity("New User created", HttpStatus.OK);
         } else {
-            // case already exists
+            // case user already exists
             return new ResponseEntity("user already exists", HttpStatus.CONFLICT);
         }
+
     }
 
     @GetMapping
@@ -81,16 +84,69 @@ public class UserController {
         return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/{username}")
-    public ResponseEntity<String> updateExistingUser(@PathVariable String username, @RequestBody User c) {
+    @PutMapping("/update")
+    public ResponseEntity<String> updateExistingUser(@RequestBody User c) {
 
-        List<User> users = userRepository.findUserByUsername(username);
-        if (!users.isEmpty()) {
-            c.setToken(users.get(0).getToken());
-            c.setId(users.get(0).getId());
-            this.deleteExistingUser(username);
-            this.add(c);
+        Optional<User> potentialUser = userRepository.findById(c.getId());
+        if (potentialUser.isPresent()) {
+            User u = potentialUser.get();
+            c.setToken(u.getToken());
+            c.setId(u.getId());
+            c.setPassword(u.getPassword());
+            userRepository.delete(u);
+            User createdUser = userService.addUser(c,true);
+            if (createdUser != null) {
+                return new ResponseEntity<String>("", HttpStatus.OK);
+            } else {
+                // username is already taken
+                return new ResponseEntity<String>("", HttpStatus.CONFLICT);
+            }
         }
         return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("/forgotPassword")
+    public ResponseEntity forgotPassword(@RequestBody Map<String, String> request) {
+        // request should have two keys, username & email
+        try {
+            String username = request.get("username");
+            String email = request.get("email");
+            userService.forgotPassword(username, email);
+            return new ResponseEntity<String>("", HttpStatus.OK);
+        } catch (NotFoundException e) {
+            // case data did not match an existing user
+            return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("", HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @PutMapping("/resetPassword")
+    public ResponseEntity resetPassword(@RequestBody Map<String, String> request) {
+        // request should have two keys, resetPasswordKey & password
+        try {
+            String resetPasswordKey = request.get("resetPasswordKey");
+            String password = request.get("password");
+
+            userService.resetPassword(resetPasswordKey, password);
+            return new ResponseEntity<String>("", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("", HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @GetMapping("/validate/{resetPasswordKey}")
+    public ResponseEntity checkResetPasswordKeyIsValid(@PathVariable String resetPasswordKey) {
+        List<User> users = userRepository.findUserByResetPasswordKey(resetPasswordKey);
+        if (users.size() == 0) {
+            return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<String>("", HttpStatus.OK);
+        }
+
+    }
+
+
 }

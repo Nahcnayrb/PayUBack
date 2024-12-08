@@ -46,7 +46,8 @@ export default class DetailsModal extends Component {
                         setPayButton={this.props.setPayButton}
                         currentUsername={this.props.currentUsername}
                         isInDetails={true}
-                        setIsInDetails={this.props.setIsInDetails}>
+                        setIsInDetails={this.props.setIsInDetails}
+                        getPayerUser={this.props.getPayerUser}>
                     </ExpenseTable>
                 </Modal.Body>
                 <div className='modal-padding'></div>

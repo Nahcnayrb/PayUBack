@@ -18,10 +18,9 @@ export default class PayAllModal extends Component {
         this.setState({
             confirmClicked: true
         })
-        console.log(this.props.setPayAllConfirmation)
         this.props.setPayAllConfirmation(true)
         setTimeout(() => {
-            this.props.handlePayAll(this.props.payerUser, this.props.currentUser)
+            this.props.handlePayAll(this.props.payerUser, this.props.currentUser, this.props.amount)
         }, 200)
     }
 

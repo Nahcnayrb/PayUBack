@@ -14,7 +14,7 @@ import javax.persistence.*;
 
 @Getter
 @Setter
-@Container(containerName = "User", ru = "400")
+@Container(containerName = "User", ru = "100")
 public class User {
 
     @Id
@@ -30,8 +30,10 @@ public class User {
     private String lastName;
     private String password;
     private String token;
+    private String email;
+    private String resetPasswordKey;
 
-    public User(String firstName, String lastName, String username, String password) {
+    public User(String firstName, String lastName, String username, String password, String email) {
         this.id = ValueGenerator.generateNewValue();
         if (firstName != null) {
             this.firstName = firstName.trim();
@@ -49,6 +51,11 @@ public class User {
 
         this.username = username.toLowerCase().trim();
         this.password = password;
+        if (email != null) {
+            this.email = email.trim();
+        } else {
+            this.email = "";
+        }
     }
 
 

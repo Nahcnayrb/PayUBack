@@ -203,7 +203,7 @@ body, html, .App, #root, .auth-wrapper {
 }
 
 .dashboard-padding {
-  padding-top: 8%;
+  padding-top: 50px;
 }
 
 
@@ -245,13 +245,14 @@ body, html, .App, #root, .auth-wrapper {
   padding-left: 5px;
   margin-top: 5px;
   cursor: pointer;
+  font-size: 15px;
 }
 
 #footnote-label {
   padding-top: 5%;
   margin: 0 auto;
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
 }
 
@@ -263,12 +264,109 @@ body, html, .App, #root, .auth-wrapper {
   display: inline-block;
 }
 
+/* .nav-link:hover {
+  background-color: #7f7d7d;
+} */
+
+.group-menu-container {
+  display: flex;
+  justify-content: space-between;
+  /* min-width: 1000px; */
+  /* margin-left: 40%; */
+  margin: 0 auto;
+  max-width: 90%;
+  background: #ffffff;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+  padding: 40px  55px 45px 55px;
+  border-radius: 15px;
+  transition: all .3s;
+}
+
+.group-container {
+  text-align: center;
+  width:90%;
+  margin: auto;
+  background: #ffffff;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+  padding: 0px  15px 0px 0px;
+  height: 100px;
+  border-radius: 15px;
+  transition: all .3s;
+
+}
+
+.group-label {
+  margin-top: 35px;
+  font-size: 18px;
+
+}
+
+.right-group-container {
+  float: right;
+}
+
+.left-group-container {
+  text-align: center;
+  float: left;
+  height: 100%;
+  width: 55%;
+  border-radius: 15px;
+  filter: brightness(110%)
+
+}
 
 
-@media (max-width: 700px) {
+.group-link {
+  color: black;
+  text-decoration: none !important;
+}
+
+.group-link:link {
+  color: black;
+}
+
+.group-link:hover {
+  color: #003366;
+}
+
+#icon-label {
+  display: inline-block;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin: 0 auto;
+
+}
+
+.icon-div {
+  padding-top: 10px;
+  text-align:center;
+
+}
+
+.groupname-div {
+  max-width: 200px;
+}
+
+.group-button-label {
+  font-weight: 500;
+  font-family: 'Fira Sans', sans-serif;
+  cursor: pointer;
+}
+
+
+.groups-padding {
+  padding-top: 25px;
+}
+
+.dashboard-offset-padding {
+  padding-top: 100px;
+}
+
+
+@media (max-width: 600px) {
 
   #data-header {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .navbar-headers {
@@ -283,6 +381,19 @@ body, html, .App, #root, .auth-wrapper {
   .modal-padding {
     padding-top: 5%;
   }
+  .button-labels {
+    padding-left: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    font-size: 9px;
+  }
+
+  .group-label {
+    margin-top: 35px;
+    font-size: 15px;
+  
+  }
+
 
 }
 
@@ -312,7 +423,7 @@ body, html, .App, #root, .auth-wrapper {
   }
 
   .dashboard-padding {
-    padding-top: 30%;
+    padding-top: 50px;
   }
 
   .navbar-brand {
@@ -346,6 +457,20 @@ body, html, .App, #root, .auth-wrapper {
 
   #next-modal-alert {
     width: 100% !important;
+  }
+
+  .group-menu-container {
+    /* display: block; */
+    justify-content: space-between;
+    text-align:center;
+    /* min-width: 1000px; */
+    /* margin-left: 40%; */
+    margin: 0 auto;
+    max-width: 90%;
+    background: #ffffff;
+    box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+    border-radius: 15px;
+    transition: all .3s;
   }
 
 

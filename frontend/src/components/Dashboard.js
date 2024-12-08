@@ -7,9 +7,11 @@ import PayAllModal from './PayAllModal';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
-import { toHaveDisplayValue } from '@testing-library/jest-dom/matchers';
+import PayDetailsModal from './PayDetailsModal';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 export default class Dashboard extends Component {
+
 
     state = {
         hasFetched:false,
@@ -60,6 +62,9 @@ export default class Dashboard extends Component {
     }
 
     getLabel = (username) => {
+        if (!this.props.users) {
+            window.location.reload()
+        }
 
         let allUsers = this.props.users
 
@@ -98,28 +103,6 @@ export default class Dashboard extends Component {
             endpoint = "/expenses/owing/" + currentUsername
         }
 
-        // initiate hashmap outside of for each expense loop
-        // in the group by users view for to be paid:
-        // isExpenses to pay = false
-        // for each expense
-        //      for each borrower in expense
-        //              if borrower hasn't paid
-        //                  check if hashmap has the borrower
-        //                  case yes: we fetch the current outstanding amount, add to it 
-        //                   case no: we store borrower into hashmap with the curr expense amount
-
-        // at the end of the for each expense loop, we have a hashmap full of borrowers who hasn't paid yet
-
-        // isExpensesToPay == true
-        // initiate hashmap
-        // in the group by users view for to pay:
-        // for each expense
-        //      for each borrower in expense
-        //              if borrower == curr user
-        //                  check if has paid
-        //                      if hasn't paid, we store the payerUsername as key into map
-        //                              value += the amount that user owes for curr expense
-
 
         let map = new Map()
 
@@ -132,19 +115,29 @@ export default class Dashboard extends Component {
 
         await axios.get(endpoint).then(
             res => {
+                let filteredExpenseList = this.filterExpensesByCurrentGroup(res.data)
                 if (isExpensesToPay) {
-                    this.setHasExpensesToPay(true)
-                    this.setState({
-                        toPayExpenseData: res.data
-                    })
+
+                    if (filteredExpenseList.length > 0) {
+
+                        this.setHasExpensesToPay(true)
+
+                        this.setState({
+                            toPayExpenseData: filteredExpenseList
+                        })
+
+                    }
+
                 } else {
-                    this.setHasExpensesToBePaid(true)
-                    this.setState({
-                        toBePaidExpenseData: res.data
-                    })
+                    if (filteredExpenseList.length > 0) {
+                        this.setHasExpensesToBePaid(true)
+                        this.setState({
+                            toBePaidExpenseData: filteredExpenseList
+                        })
+                    }
                 }
 
-                res.data.forEach((expenseJson) => {
+                filteredExpenseList.forEach((expenseJson) => {
                     // for each expense object that the current user is the payer user
 
                     let hasSettled = true // true by default for the isExpensesToPay case
@@ -162,6 +155,9 @@ export default class Dashboard extends Component {
                             hasSettled = hasSettled & borrowerData.hasPaid
                             if (borrowerData.hasPaid) {
                                 amount -= parseFloat(borrowerData.amount)
+                                if (!map.has(borrowerData.username) && (borrowerData.username !== this.props.user.username)) {
+                                    map.set(borrowerData.username, 0)
+                                }
                             } else {
                                 currTotal += borrowerData.amount
                                 // borrower has not paid user back for this expense
@@ -196,6 +192,11 @@ export default class Dashboard extends Component {
                                         map.set(payerUsername, borrowerData.amount)
                                     }
 
+                                } else {
+                                    // case 
+                                    if (!map.has(payerUsername)) {
+                                        map.set(payerUsername, 0)
+                                    }
                                 }
                             }
                         }
@@ -291,6 +292,28 @@ export default class Dashboard extends Component {
 
     }
 
+    filterExpensesByCurrentGroup = (expenseData) => {
+        if (this.props.isGeneralDashboard) {
+            // case in main dashboard
+            return expenseData
+
+        } else {
+            // case in groups dashboard
+
+            let filteredExpenseList = []
+
+            expenseData.forEach((expense) => {
+                if (expense.groupId === this.state.groupId) {
+                    filteredExpenseList.push(expense)
+                }
+            })
+
+            return filteredExpenseList
+    
+        }
+
+    }
+
     fetchOwingExpenses = async () => {
         // people owe the user money
         //isExpensesToPay == false here 
@@ -337,6 +360,7 @@ export default class Dashboard extends Component {
 
         // case edit button was clicked on an expense
         // set show expense = true
+        // window.scrollTo(0,document.body.scrollHeight)
 
         // get expense data
         this.setState({
@@ -387,9 +411,12 @@ export default class Dashboard extends Component {
 
     handleDelete = async (expenseId, description, isInDetails) => {
 
+        let deleteDescription = "Are you sure you want to delete the Expense: '" + (description.length > 20 ? description.substring(0,21) : description)
+         + "' ? This will delete the expense FOR EVERYONE involved."
+
         
         this.setState({
-            deleteDescription: description,
+            deleteDescription: deleteDescription,
             deleteExpenseId: expenseId
         })
 
@@ -422,22 +449,34 @@ export default class Dashboard extends Component {
 
     }
 
-    handlePayAll = async (payerUsername, borrowerUsername) => {
+    handlePayAll = async (payerUsername, borrowerUsername, amount) => {
 
 
         let label = this.getLabel(payerUsername)
         this.setState({
             payAllLabel:label,
-            payAllUser: payerUsername
+            payAllUser: payerUsername,
+            payDetailsAmount: amount
         })
 
         if (this.state.confirmPayAll) {
             // case user clicked confirm on delete modal
-            await axios.put("/expenses/payAll/" + payerUsername + "/" + borrowerUsername).then(
+            let endpoint = this.props.isGeneralDashboard ? "/expenses/payAll/" : "/expenses/payAllGroups/" + this.state.groupId + "/"
+            endpoint += payerUsername + "/" + borrowerUsername
+
+            let payerUser = this.getUserByUsername(payerUsername)
+
+
+            await axios.put(endpoint).then(
                 res => {
                     this.updateExpenses()
                     this.setShowPayAll(false)
                     this.setConfirmPayAll(false)
+
+                    this.setState({
+                        payDetailsUser: payerUser
+                    })
+                    this.setShowPayDetails(true)
                     
                 },
                 err => {
@@ -453,12 +492,14 @@ export default class Dashboard extends Component {
     }
 
     handlePayExpensesToggle = (isTurnedOn) => {
+        this.fetchOwedExpenses()
         this.setState({
             payExpensesToggle: isTurnedOn
         })
     }
 
     handleExpensesToBePaidToggle = (isTurnedOn) => {
+        this.fetchOwingExpenses()
         this.setState({
             expensesToBePaidToggle: isTurnedOn
         })
@@ -477,12 +518,11 @@ export default class Dashboard extends Component {
 
         expensesDataList.forEach((expenseData) => {
 
-            if ((isToPay) && (username === expenseData.payerUsername)) {
-                // case find all the toPay expenses where username == payerUsername
-                let dataJson = {
-                    expenseId: expenseData.id,
+            if (isToPay) {
+                if (username === expenseData.payerUsername) {
+                    // case find all the toPay expenses where username == payerUsername
+                    expenseIdList.push(expenseData.id)
                 }
-                expenseIdList.push(expenseData.id)
             } else {
 
                 function checkUsername(borrowerData) {
@@ -510,7 +550,6 @@ export default class Dashboard extends Component {
         })
 
 
-
         return [expenseIdList,targetRowsData]
     }
 
@@ -533,6 +572,90 @@ export default class Dashboard extends Component {
         })
     }
 
+    getCurrentGroupData = () => {
+        if (this.props.isGeneralDashboard) {
+            // don't fetch if is general dashboard
+            return
+        }
+
+        
+        let href = window.location.href
+        let groupId = href.substring(href.lastIndexOf('/') + 1)
+
+        this.setState({
+            groupId: groupId
+        })
+
+        if (groupId === "individual") {
+            let group = {
+                id: groupId,
+                groupName: "Individual Expenses",
+                usernames: "",
+                colourHexCode: "#d3d3d3"
+            }
+            this.setState({
+                group: group
+            })
+        } else {
+
+            setTimeout(()=> {
+
+        
+                for (let i = 0; i < this.props.groupsData.length; i++) {
+                    let currGroup = this.props.groupsData[i]
+                    if (currGroup.id === groupId) {
+                        // found group
+        
+                        this.setState({
+                            group: currGroup
+                        })
+        
+                    }
+                }
+
+
+            },600)
+        }
+
+    }
+
+    getUserByUsername = (username) => {
+        for (let i = 0; i < this.props.users.length; i++) {
+            let currUser = this.props.users[i]
+            if (currUser.username === username) {
+                return currUser
+            }
+        }
+        return ""
+    }
+
+    getPayerUser = (expenseId) => {
+
+        let payerUsername = ""
+        for (let i = 0; i < this.state.toPayExpenseData.length; i++) {
+            let currExpense = this.state.toPayExpenseData[i]
+            if (currExpense.id === expenseId) {
+                // found expense
+                payerUsername = currExpense.payerUsername
+                break
+            }
+        }
+
+        for (let i = 0; i < this.props.users.length; i++) {
+            let currUser = this.props.users[i]
+            if (currUser.username === payerUsername) {
+                return currUser
+            }
+        }
+
+    }
+
+    setShowPayDetails = (show) => {
+        this.setState({
+            showPayDetails: show
+        })
+    }
+
 
 
     render() {
@@ -549,19 +672,64 @@ export default class Dashboard extends Component {
             )
         }
 
+
         if (!this.state.hasFetched) {
             // one time execution
             window.scrollTo(0, 0)
             this.updateExpenses()
+            this.getCurrentGroupData()
+
             this.setState({
-                hasFetched: true
+                hasFetched: true,
             })
         }
         // case has fetched
         // state must have owing and owed expenses
+        let groupColour = "#000000"
+
+        if (this.state.group) {
+            let colour = this.state.group.colourHexCode
+
+            var c = colour.substring(1);      // strip #
+            var rgb = parseInt(c, 16);   // convert rrggbb to decimal
+            var r = (rgb >> 16) & 0xff;  // extract red
+            var g = (rgb >>  8) & 0xff;  // extract green
+            var b = (rgb >>  0) & 0xff;  // extract blue
+
+            var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+
+            if (luma < 70) {
+                // set group name to white instead of black
+                groupColour = "#ffffff"
+            }
+        }
     
         return (
             <>
+
+            <div className='dashboard-offset-padding'/>
+            <div style={{backgroundColor: this.state.group? this.state.group.colourHexCode : "#ffffff"}}className='dashboard-container'>
+                {this.props.isGeneralDashboard? 
+
+                <h3  style={{textAlign: "center"}}>Main Dashboard</h3>
+                :
+                <>
+                <h3 style={{textAlign: "center", color: groupColour}}>{this.state.group? this.state.group.groupName : ""}</h3>
+                <label style={{display: "block", textAlign: "center", fontSize: "14px",  color: groupColour}}>
+                    {this.state.group? (this.state.group.id != "individual" ? ("Group ID: " + this.state.group.id) : "") : ""}
+                    {this.state.group? (this.state.group.id != "individual" ? 
+                        <ContentCopyIcon 
+                        fontSize='large' 
+                        style={{textAlign: "center", paddingLeft: "10px", color: groupColour, cursor: "pointer"}} 
+                        onClick={() => {navigator.clipboard.writeText(this.state.group.id).then(()=>{this.setState({clickedCopy: true})})}}/>
+                        : "") : ""}
+                    {this.state.clickedCopy ?<label style={{textAlign: "center", fontSize: "15px", paddingLeft: "10px", color: groupColour}}>Copied!</label>: ""}
+                    
+                </label>
+                </>
+                
+                }
+            </div>
             
             <div className='dashboard-padding'/>
             <div className='dashboard-container'>
@@ -570,7 +738,7 @@ export default class Dashboard extends Component {
                         <>
                        
                         <h3>
-                            Expenses to pay:
+                            Expenses to pay: {(this.state.toPayTotal.toFixed(2) === "0.00") ? "None :)" : ""}
                         </h3>
                         <h3>
                             Total ${this.state.toPayTotal.toFixed(2)}
@@ -597,7 +765,9 @@ export default class Dashboard extends Component {
                             currentUsername={this.props.user.username}
                             isInDetails={false}
                             handlePayAll={this.handlePayAll}
-                            setIsInDetails={this.setIsInDetails}>
+                            setIsInDetails={this.setIsInDetails}
+                            getPayerUser={this.getPayerUser}
+                            getUserByUsername={this.getUserByUsername}>
 
                         </ExpenseTable>
                         </>
@@ -612,7 +782,7 @@ export default class Dashboard extends Component {
                     {this.state.hasExpensesToBePaid?
                         <>
                         <h3>
-                            Expenses to be paid back:
+                            Expenses to be paid back: {(this.state.toBePaidTotal.toFixed(2) === "0.00") ? "None :)" : ""}
                         </h3>
                         <h3>Total ${this.state.toBePaidTotal.toFixed(2)}</h3>
                         <Divider sx={{ borderBottomWidth: 5 }}/>  
@@ -651,7 +821,8 @@ export default class Dashboard extends Component {
                 currentUser={this.props.user}
                 updateExpenses={this.updateExpenses}
                 isInDetails={this.state.modalOpenedInDetails}
-                setInDetails={this.setIsInDetails}/>
+                setInDetails={this.setIsInDetails}
+                groupsData={this.props.groupsData}/>
             <DeleteModal 
                 show={this.state.showDelete} 
                 setShow={this.setShowDelete} 
@@ -659,8 +830,7 @@ export default class Dashboard extends Component {
                 handleDelete={this.handleDelete}
                 isInDetails={this.state.modalOpenedInDetails}
                 description={this.state.deleteDescription} 
-                expenseId={this.state.deleteExpenseId}
-                updateExpenses={this.updateExpenses}/>
+                id={this.state.deleteExpenseId}/>
             <PayAllModal
                 show={this.state.showPayAll}
                 setShow={this.setShowPayAll}
@@ -669,7 +839,15 @@ export default class Dashboard extends Component {
                 currentUser={this.props.user.username}
                 handlePayAll={this.handlePayAll}
                 updateExpenses={this.updateExpenses}
-                setPayAllConfirmation={this.setConfirmPayAll}/>
+                setPayAllConfirmation={this.setConfirmPayAll}
+                amount={this.state.payDetailsAmount} />
+            <PayDetailsModal 
+                    show={this.state.showPayDetails} 
+                    handleClose={this.setShowPayDetails} 
+                    amount={this.state.payDetailsAmount} 
+                    payerUser={this.state.payDetailsUser} 
+                    isInDetails={false}>
+            </PayDetailsModal>
             </div>
             <div className='dashboard-padding' />
             </>

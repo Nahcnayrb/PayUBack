@@ -23,5 +23,8 @@ public interface UserRepository extends CosmosRepository<User, String> {
     @Query(value="SELECT * FROM u where u.username=@username")
     List<User> findUserByUsername(@Param("username") String username);
 
+    @Query(value="SELECT * FROM u where u.resetPasswordKey=@resetPasswordKey")
+    List<User> findUserByResetPasswordKey(@Param("resetPasswordKey") String resetPasswordKey);
+
 
 }

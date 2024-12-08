@@ -9,6 +9,7 @@ import DetailsModal from "./DetailsModal";
 import InfoIcon from '@mui/icons-material/Info';
 import PaidIcon from '@mui/icons-material/Paid';
 import axios from 'axios';
+import PayDetailsModal from "./PayDetailsModal";
 
 export default class ExpenseTable extends Component {
 
@@ -34,16 +35,6 @@ export default class ExpenseTable extends Component {
 
         let [expenseIDList, targetRowsData] = this.props.getTargetRows(username, this.props.isToPay)
 
-
-        /**
-         *                   let dataJson = {
-                        expenseId: expenseData.id,
-                        hasSettled: borrower.hasPaid,
-                        amount: borrower.amount
-                    }} row 
-
-         */
-
         function checkExpenseID(row) {
             return expenseIDList.includes(row.expenseId)
         }
@@ -56,7 +47,7 @@ export default class ExpenseTable extends Component {
                 for (let i = 0; i < targetRowsData.length; i++) {
                     if (targetRowsData[i].expenseId === row.expenseId) {
                         // matched target row data with filtered row
-                        row.amount = targetRowsData[i].amount
+                        row.amount = "$ " + targetRowsData[i].amount
                         row.hasSettled = targetRowsData[i].hasSettled ? "Paid :)" : "Unpaid :(" 
                     }
                 }
@@ -65,7 +56,6 @@ export default class ExpenseTable extends Component {
             // case is to pay
             for (let i = 0; i < filteredRows.length; i++) {
                 let currRow = filteredRows[i]
-                console.log(currRow.hasSettled)
                 if (currRow.hasSettled == "Paid :)") {
                     payButtonArray[i] = true
                 }
@@ -101,19 +91,22 @@ export default class ExpenseTable extends Component {
         })
     }
 
-    handlePay = async (expenseId, i) => {
+    handlePay = async (expenseId, i, amount) => {
         this.props.setPayButton(true, i)
+
+        let payerUser = this.props.getPayerUser(expenseId)
 
         await axios.put("/expenses/pay/" + expenseId + "/" + this.props.currentUsername).then(
             res => { 
                 console.log("marked as paid")
-                if (this.props.isInDetails) {
-                    window.location.reload()
-                } else {
-                    this.props.updateExpenses()
-                }
-                //this.props.updateExpenses()
-              
+
+                this.setState({
+                    payDetailsAmount: amount,
+                    payDetailsUser: payerUser
+                })
+                
+                this.setShowPayDetails(true)
+
             }
         ).catch(
             err => {
@@ -122,6 +115,22 @@ export default class ExpenseTable extends Component {
         )
 
 
+    }
+
+    setShowPayDetails = (show) => {
+        this.setState({
+            showPayDetails: show
+        })
+    }
+
+    handleClosePayDetails = () => {
+        this.setShowPayDetails(false)
+
+        if (this.props.isInDetails) {
+            window.location.reload()
+        } else {
+            this.props.updateExpenses()
+        }
     }
 
 
@@ -157,12 +166,12 @@ export default class ExpenseTable extends Component {
               <Tbody>
                 {this.props.usersViewArray.map((row) => (
                     <Tr key={row.username}>
-                        <Td>{row.label}</Td>
+                        <Td>{row.label.split("(", 1)[0].trim()}</Td>
                         <Td>{row.amount}</Td>
 
                         {this.props.isToPay ?
                         <Td>
-                            <Button variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.props.handlePayAll(row.username, this.props.currentUsername)}}>
+                            <Button variant="contained" disabled={row.amount === "$ 0.00"} style={{backgroundColor: "#003366"}} onClick={ () => { this.props.handlePayAll(row.username, this.props.currentUsername, row.amount)}}>
                                 <PaidIcon fontSize="small"/>
                                 <label className="button-labels">Pay All</label>
                             </Button>
@@ -193,7 +202,8 @@ export default class ExpenseTable extends Component {
                     payButtonArray={this.state.payButtonArray}
                     setPayButton={this.setPayButton}
                     currentUsername={this.props.currentUsername}
-                    setIsInDetails={this.props.setIsInDetails}>
+                    setIsInDetails={this.props.setIsInDetails}
+                    getPayerUser={this.props.getPayerUser}>
                 </DetailsModal>
                 
               </Tbody>
@@ -209,7 +219,7 @@ export default class ExpenseTable extends Component {
 
                         {this.props.isToPay ?
                         <Td>
-                            <Button disabled={this.props.payButtonArray[i]} variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.handlePay(row.expenseId, i) }}>
+                            <Button disabled={this.props.payButtonArray[i]} variant="contained" style={{backgroundColor: "#003366"}} onClick={ () => { this.handlePay(row.expenseId, i, row.amount) }}>
                                 <PaidIcon fontSize="small"/>
                                 <label className="button-labels">Pay</label>
                             </Button>
@@ -233,7 +243,14 @@ export default class ExpenseTable extends Component {
 
                 ))}
               </Tbody>
-    }
+                }
+                <PayDetailsModal 
+                    show={this.state.showPayDetails} 
+                    handleClose={this.handleClosePayDetails} 
+                    amount={this.state.payDetailsAmount} 
+                    payerUser={this.state.payDetailsUser} 
+                    isInDetails={this.props.isInDetails}>
+                </PayDetailsModal>
             </Table>
         )}
 

@@ -22,14 +22,17 @@ export default class Nav extends Component {
   handleShow = () => {
 
       this.setShow(true)
+      
   }
 
     handleLogout = () => {
       localStorage.removeItem("token")
       this.props.setUser(null)
-      //window.location.assign("/")
 
     }
+  handleDashboard = () => {
+    setTimeout(()=>{window.location.reload()},10)
+  }
 
     render() {
 
@@ -41,17 +44,16 @@ export default class Nav extends Component {
         buttons = (
           <ul className='navbar-nav ml-auto'>
             <li  className='nav-item'>
-              <Link className='nav-link' to={'/dashboard'} >Dashboard</Link>
+              <Link className='nav-link' to={'/groups'}>Groups</Link>
             </li>
             <Dropdown>
               <Dropdown.Toggle variant="white" id="dropdown-basic" >
                 {this.props.user.firstName} {this.props.user.lastName}
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item href="#/action-2">Groups</Dropdown.Item>
-                <Dropdown.Item href="#/action-1">My Profile</Dropdown.Item>
-                <Dropdown.Item href="#/action-2">Settings</Dropdown.Item>
-                <Dropdown.Item onClick={this.handleLogout}>Logout</Dropdown.Item>
+                <Dropdown.Item href="#/dashboard"  onClick={this.handleDashboard} >Dashboard</Dropdown.Item>
+                <Dropdown.Item href="#/profile">My Profile</Dropdown.Item>
+                <Dropdown.Item href="#/" onClick={this.handleLogout}>Logout</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </ul>
@@ -84,7 +86,7 @@ export default class Nav extends Component {
             <AddIcon></AddIcon>
             <label className='navbar-headers'>New Expense</label>
           </Button>
-          <AddModal isAdd={true} users={this.props.users} show={this.state.show} setShow={this.setShow} currentUser={this.props.user}></AddModal>
+          <AddModal isAdd={true} users={this.props.users} show={this.state.show} setShow={this.setShow} currentUser={this.props.user} groupsData={this.props.groupsData}></AddModal>
           </> : <></>}
           <div className="right-div">
             {buttons}
